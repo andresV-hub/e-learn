@@ -1,16 +1,26 @@
-.card
-  .card-header
-    %h2 Sign up
-  .card-body
-    = simple_form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f|
-      = f.error_notification
-      .form-inputs
-        = f.input :email, required: true, autofocus: true, input_html: { autocomplete: "email" }
-        = f.input :password, required: true, hint: ("#{@minimum_password_length} characters minimum" if @minimum_password_length), input_html: { autocomplete: "new-password" }
-        = f.input :password_confirmation, required: true, input_html: { autocomplete: "new-password" }
-        = recaptcha_tags
-        %br
-      .form-actions
-        = f.button :submit, "Sign up"
-  .card-footer
-    = render "devise/shared/links"
+- content_for :title do
+  E-Learn | Sign up
+
+.el-auth
+  = link_to root_path do
+    = image_tag 'logo.png', alt: 'E-Learn', class: 'el-auth__logo'
+  %h1.el-auth__title Create your account
+
+  %section.el-panel
+    .el-panel__body
+      = simple_form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f|
+        = f.error_notification
+        = f.input :email, required: true, autofocus: true, input_html: { autocomplete: 'email' }
+        = f.input :password, required: true,
+                  hint: ("#{@minimum_password_length} characters minimum" if @minimum_password_length),
+                  input_html: { autocomplete: 'new-password' }
+        = f.input :password_confirmation, required: true, input_html: { autocomplete: 'new-password' }
+        -# Sin config/master.key las credenciales vienen vacías y recaptcha_tags
+        -# lanza Recaptcha::RecaptchaError, dejando el registro inaccesible en
+        -# desarrollo. Mismo criterio que config/initializers/devise.rb: si no
+        -# hay clave configurada, se omite. En producción sí la hay y se pinta.
+        - if Recaptcha.configuration.site_key.present?
+          .my-3= recaptcha_tags
+        = f.button :submit, 'Sign up', class: 'btn btn-primary w-100'
+
+      = render 'devise/shared/links'

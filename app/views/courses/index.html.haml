@@ -1,68 +1,86 @@
 - content_for :title do
-  E-Learn 
-  \| 
-  All Courses
+  E-Learn | All courses
 
-%h1
-  %h3
-  .text-center
-    Courses
-    .badge.badge-info
-      = @courses.count
-  %p
+-# Catálogo. styles.md §5 (filtros en columna lateral + rejilla) y §6.6.
+%header.el-page-header
+  .el-page-header__lead
+    %span.el-page-header__eyebrow Catalog
+    %h1.el-page-header__title
+      Courses
+      %span.el-pill.el-pill--info= @courses.count
 
-.row
-  .col-md-2
-    /= search_form_for @q do |f|
-    = search_form_for @ransack_courses, as: :courses_search, url: @ransack_path  do |f|
-      = f.label :title
-      = f.search_field :title_cont, placeholder: 'Title', class: 'form-control form-control-sm'
-      = f.label :tag
-      = f.search_field :course_tags_tag_name_cont, placeholder: 'Tag name', class: 'form-control form-control-sm'
-      = f.label :description
-      = f.search_field :short_description_cont, placeholder: 'Description', class: 'form-control form-control-sm'
-      /= f.search_field :language_cont, placeholder: 'Language', class: 'form-control form-control-sm'
-      /= f.select :language_cont, ['English', 'Polish', 'Russian'], include_blank: true, class: 'form-control form-control-sm'
-      = f.label :language
-      = f.select :language_cont, Course.languages, include_blank: true
-      /= f.search_field :level_cont, placeholder: 'Level', class: 'form-control form-control-sm'
-      .row
-      = f.label :level
-      .row
-      = f.select :level_cont, Course.levels, include_blank: true
-      .row
-      = f.label :price
-      = f.search_field :price_eq, placeholder: 'Price', class: 'form-control form-control-sm'
-      = f.label :teacher
-      = f.search_field :user_email_cont, placeholder: 'Email', class: 'form-control form-control-sm'
-      .row
-      = sort_link(@ransack_courses, :price)
-      .row
-      = sort_link(@ransack_courses, :average_rating, "Top Rated")
-      .row
-      = sort_link(@ransack_courses, :enrollments_count, "Most Popular")
-      .row
-      = sort_link(@ransack_courses, :created_at, "Fresh")
-      .row
-      = f.submit
-    = link_to 'refresh', @ransack_path
-    /= controller_name
-    /= action_name
-    /= link_to 'current page', controller: controller_name, action: action_name
-    .row
-    - @tags.each do |tag|
-      /= link_to courses_path(courses_search: {course_tags_tag_id_eq: tag.id}) do
-      = link_to controller: controller_name, action: action_name, courses_search: {course_tags_tag_id_eq: tag.id} do
-        .badge.badge-info
-          = tag.name
-          %span.badge.badge-light
-            = tag.course_tags_count
+.row.g-4
+  .col-lg-3
+    -# En móvil los filtros van plegados para no empujar la rejilla hacia abajo.
+    %button.btn.btn-outline-primary.w-100.d-lg-none.mb-3{ type: 'button', 'data-bs-toggle': 'collapse',
+                                                          'data-bs-target': '#courseFilters',
+                                                          'aria-expanded': 'false', 'aria-controls': 'courseFilters' }
+      %i.fa.fa-filter{ 'aria-hidden': 'true' }
+      Filters
 
+    #courseFilters.collapse.d-lg-block
+      %aside.el-panel
+        .el-panel__body.el-filters
+          = search_form_for @ransack_courses, as: :courses_search, url: @ransack_path do |f|
+            .el-filters__group
+              = f.label :title_cont, 'Title'
+              = f.search_field :title_cont, class: 'form-control', placeholder: 'Title'
+            .el-filters__group
+              = f.label :course_tags_tag_name_cont, 'Tag'
+              = f.search_field :course_tags_tag_name_cont, class: 'form-control', placeholder: 'Tag name'
+            .el-filters__group
+              = f.label :short_description_cont, 'Description'
+              = f.search_field :short_description_cont, class: 'form-control', placeholder: 'Description'
+            .el-filters__group
+              = f.label :language_cont, 'Language'
+              -# form-select, no form-control: en Bootstrap 5 los desplegables
+              -# tienen su propia clase (styles.md §6.6).
+              = f.select :language_cont, Course.languages, { include_blank: true }, class: 'form-select'
+            .el-filters__group
+              = f.label :level_cont, 'Level'
+              = f.select :level_cont, Course.levels, { include_blank: true }, class: 'form-select'
+            .el-filters__group
+              = f.label :price_eq, 'Price'
+              = f.search_field :price_eq, class: 'form-control', placeholder: 'Price'
+            .el-filters__group
+              = f.label :user_email_cont, 'Teacher'
+              = f.search_field :user_email_cont, class: 'form-control', placeholder: 'Email'
 
-  .col-md-10
-    .card-columns
-      - @courses.each do |course|
-        = render 'courses/course', course: course
-    /!= pagy_nav(@pagy)
-    != pagy_bootstrap_nav(@pagy)
-%br
+            = f.submit 'Search', class: 'btn btn-primary w-100'
+            = link_to 'Clear filters', @ransack_path, class: 'btn btn-link w-100 mt-1'
+
+      %aside.el-panel
+        .el-panel__head
+          %h2 Sort by
+        .el-panel__body.d-flex.flex-column.gap-2
+          = sort_link(@ransack_courses, :average_rating, 'Top rated')
+          = sort_link(@ransack_courses, :enrollments_count, 'Most popular')
+          = sort_link(@ransack_courses, :created_at, 'Newest')
+          = sort_link(@ransack_courses, :price, 'Price')
+
+      - if @tags.any?
+        %aside.el-panel
+          .el-panel__head
+            %h2 Tags
+          .el-panel__body.d-flex.flex-wrap.gap-1
+            - @tags.each do |tag|
+              = link_to({ controller: controller_name, action: action_name, courses_search: { course_tags_tag_id_eq: tag.id } },
+                        class: 'el-pill el-pill--info') do
+                = tag.name
+                %span.opacity-75= tag.course_tags_count
+
+  .col-lg-9
+    - if @courses.any?
+      .row.row-cols-1.row-cols-md-2.row-cols-xl-3.g-4
+        - @courses.each do |course|
+          .col= render 'courses/course', course: course
+
+      .mt-4
+        != @pagy.series_nav(:bootstrap)
+    - else
+      .el-panel
+        .el-empty
+          %i.el-empty__icon.fa.fa-search{ 'aria-hidden': 'true' }
+          .el-empty__title No courses match that search yet
+          %p.mb-3 Try a broader term or clear the filters.
+          = link_to 'Clear filters', @ransack_path, class: 'btn btn-outline-primary'

@@ -1,8 +1,12 @@
 class LessonsController < ApplicationController
   before_action :set_lesson, only: [:show, :edit, :update, :destroy, :delete_video]
 
+  # La ruta es /courses/:course_id/lessons, así que el listado es el temario de
+  # ese curso. Antes devolvía Lesson.all sin cargar @course, y la vista (que
+  # además enlazaba a rutas de lección sin anidar, inexistentes) reventaba.
   def index
-    @lessons = Lesson.all
+    @course = Course.friendly.find(params[:course_id])
+    @lessons = @course.lessons.rank(:row_order)
   end
   
   def show

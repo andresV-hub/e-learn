@@ -1,6 +1,9 @@
 = render layout: 'courses/course_wizard/step' do
   = simple_form_for @course, url: course_course_wizard_path, method: :put do |f|
+    %p.el-meta
+      Publishing makes the course visible in the catalog once an administrator approves it.
+    .d-flex.flex-wrap.gap-2.mb-3
+      = course_status_pills(@course)
 
-    = f.input :published
-
-    = f.button :submit
+    = f.input :published, label: 'Publish this course'
+    = f.button :submit, 'Save', class: 'btn btn-primary'

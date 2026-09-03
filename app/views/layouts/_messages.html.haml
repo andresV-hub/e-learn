@@ -1,5 +1,10 @@
+-# Alertas. styles.md §6.10.
+-# El botón es .btn-close con data-bs-dismiss: en Bootstrap 5 la clase .close y
+-# el atributo data-dismiss de la 4 no existen, así que no cerraban.
 - flash.each do |name, msg|
-  - if msg.is_a?(String)
-    %div{:class => "alert alert-#{name.to_s == 'notice' ? 'success' : 'danger'}", :role => "alert"}
-      %button.close{"aria-hidden" => "true", "data-dismiss" => "alert", :type => "button"} ×
-      = content_tag :div, msg, :id => "flash_#{name}"
+  - next unless msg.is_a?(String)
+  - variant = { 'notice' => 'success', 'success' => 'success', 'alert' => 'danger', 'error' => 'danger' }.fetch(name.to_s, 'info')
+  .alert{ class: "alert-#{variant} alert-dismissible fade show d-flex align-items-center gap-2", role: 'alert' }
+    %i.fa{ class: variant == 'success' ? 'fa-check-circle' : 'fa-exclamation-circle', 'aria-hidden': 'true' }
+    %div{ id: "flash_#{name}" }= msg
+    %button.btn-close.ms-auto{ type: 'button', 'data-bs-dismiss': 'alert', 'aria-label': 'Close' }

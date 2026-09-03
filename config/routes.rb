@@ -13,7 +13,14 @@ Rails.application.routes.draw do
   resources :youtube, only: :show
   resources :tags, only: [:create, :index, :destroy]
   resources :courses, except: [:edit] do
-    get :purchased, :pending_review, :created, :unapproved, on: :collection
+    # Rails 8.1 ya no admite varios nombres de ruta en una sola llamada a `get`
+    # (ArgumentError: Wrong number of arguments), así que se declaran una a una.
+    collection do
+      get :purchased
+      get :pending_review
+      get :created
+      get :unapproved
+    end
     member do
       get :analytics
       patch :approve
@@ -48,5 +55,10 @@ Rails.application.routes.draw do
     get 'course_popularity'
     get 'money_makers'
   end
+  # Comprobación de estado que Rails genera desde 7.1. Devuelve 200 si la
+  # aplicación arrancó, y 500 si algún initializer falló. La usan el healthcheck
+  # del contenedor y los balanceadores; production.rb la silencia en el log.
+  get 'up' => 'rails/health#show', as: :rails_health_check
+
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 end

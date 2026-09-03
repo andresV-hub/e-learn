@@ -1,60 +1,50 @@
 - content_for :title do
-  E-Learn 
-  |
-  Course
-  = @course.title
-  |
-  Lesson
-  #{@lesson.row_order_rank + 1}.
-  = @lesson.title
+  E-Learn | #{@course.title} | #{@lesson.title}
 
+-# Aula. styles.md §5: vídeo y contenido a la izquierda, temario en la lateral.
+%nav{ 'aria-label': 'Breadcrumb' }
+  %ol.breadcrumb
+    %li.breadcrumb-item= link_to 'Courses', courses_path
+    %li.breadcrumb-item= link_to @lesson.course.title, course_path(@lesson.course)
+    %li.breadcrumb-item.active{ 'aria-current': 'page' }= @lesson.title
 
-= link_to 'Courses', courses_path
-|
-.fa.fa-graduation-cap
-= link_to course_path(@lesson.course) do
-  = @lesson.course.title
-|
-.fa.fa-check-square
-= link_to course_lesson_path(@course, @lesson) do
-  = @lesson.title
-%p
-
-/= @lesson.user_lessons.where(user: current_user).first.impressions
-.row
+.row.g-4
   .col-lg-8
     = render 'lessons/lesson', lesson: @lesson
-    %p
-    %h4
-      .fa.fa-comment
-      Comments:
-      /= Comment.count
-      /= @comments.count
-      = @lesson.comments_count
-    .card
-      .card-header
-        New comment
-      .card-body
+
+    %section.el-panel
+      .el-panel__head
+        %h2
+          %i.fa.fa-comment{ 'aria-hidden': 'true' }
+          = pluralize(@lesson.comments_count, 'comment')
+      .el-panel__body
         = render 'lessons/comments/form'
-    %p
-    - @comments.each do |comment|
-      = render 'lessons/comments/comment', comment: comment
-      %p
+
+        - if @comments.any?
+          .mt-4
+            - @comments.each do |comment|
+              = render 'lessons/comments/comment', comment: comment
+        - else
+          .el-empty.py-3
+            .el-empty__title No comments yet
+            %p.mb-0 Ask the first question about this lesson.
 
   .col-lg-4
-    %ul.list-group
-      %li.list-group-item
-        .fa.fa-graduation-cap
-        = link_to course_path(@lesson.course) do
-          = @lesson.course.title
-        .row
-        .fa.fa-spinner
-        = number_to_percentage(@course.progress(current_user), precision: 0)
+    .position-sticky{ style: 'top: 1rem;' }
+      %section.el-panel
+        .el-panel__head
+          %h2= link_to @lesson.course.title, course_path(@lesson.course)
+        .el-panel__body
+          - progress = @course.progress(current_user).to_i
+          .el-progress
+            .el-progress__bar
+              %span.el-progress__fill{ style: "width: #{progress}%",
+                                       role: 'progressbar', 'aria-valuenow': progress,
+                                       'aria-valuemin': 0, 'aria-valuemax': 100,
+                                       'aria-label': "Course progress: #{progress}%" }
+            %span.el-progress__label #{progress}% complete
 
-      - @lessons.each do |lesson|
-        - if @lesson.present? && lesson == @lesson
-          %li.list-group-item.list-group-item-success
-            = render 'lessons/lesson_preview', lesson: lesson
-        - else
-          %li.list-group-item
-            = render 'lessons/lesson_preview', lesson: lesson
+        %ul.el-lesson-list
+          - @lessons.each do |lesson|
+            %li.el-lesson-list__item{ class: ('el-lesson-list__item--current' if lesson == @lesson) }
+              = render 'lessons/lesson_preview', lesson: lesson

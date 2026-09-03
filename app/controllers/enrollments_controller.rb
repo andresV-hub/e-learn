@@ -71,7 +71,10 @@ class EnrollmentsController < ApplicationController
       format.pdf do
         render pdf: "#{@enrollment.course.title}, #{@enrollment.user.email}",
         page_size: 'A4',
-        template: "enrollments/certificate.pdf.haml"
+        # Ruta lógica, sin extensiones: Rails resuelve el formato y el handler
+        # por su cuenta. Con "…/certificate.pdf.haml" no encontraba la plantilla
+        # y el certificado respondía "Template is missing".
+        template: "enrollments/certificate"
       end
     end
   end

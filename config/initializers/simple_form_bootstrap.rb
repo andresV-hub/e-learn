@@ -14,8 +14,11 @@
 
 # Use this setup block to configure all options available in SimpleForm.
 SimpleForm.setup do |config|
-  # Default class for buttons
-  config.button_class = 'btn btn-success'
+  # Default class for buttons.
+  # Primario, no success: en el sistema de diseño el verde significa "completado
+  # / aprobado" y no es un color de acción (styles.md §2 y §6.3). Con btn-success
+  # aquí, todos los formularios enviaban con un botón verde.
+  config.button_class = 'btn btn-primary'
 
   # Define the default class of the input wrapper of the boolean input.
   config.boolean_label_class = 'form-check-label'

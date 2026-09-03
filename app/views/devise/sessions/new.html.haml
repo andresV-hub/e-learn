@@ -1,13 +1,18 @@
-.card
-  .card-header
-    %h2 Log in
-  .card-body
-    = simple_form_for(resource, as: resource_name, url: session_path(resource_name)) do |f|
-      .form-inputs
-        = f.input :email, required: false, autofocus: true, input_html: { autocomplete: "email" }
-        = f.input :password, required: false, input_html: { autocomplete: "current-password" }
+- content_for :title do
+  E-Learn | Log in
+
+-# styles.md §6 (el-auth): columna estrecha centrada, logotipo arriba.
+.el-auth
+  = link_to root_path do
+    = image_tag 'logo.png', alt: 'E-Learn', class: 'el-auth__logo'
+  %h1.el-auth__title Welcome back
+
+  %section.el-panel
+    .el-panel__body
+      = simple_form_for(resource, as: resource_name, url: session_path(resource_name)) do |f|
+        = f.input :email, required: false, autofocus: true, input_html: { autocomplete: 'email' }
+        = f.input :password, required: false, input_html: { autocomplete: 'current-password' }
         = f.input :remember_me, as: :boolean if devise_mapping.rememberable?
-      .form-actions
-        = f.button :submit, "Log in"
-  .card-footer
-    = render "devise/shared/links"
+        = f.button :submit, 'Log in', class: 'btn btn-primary w-100'
+
+      = render 'devise/shared/links'

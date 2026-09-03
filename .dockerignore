@@ -1,0 +1,43 @@
+# Control de versiones y metadatos del editor / herramientas.
+.git/
+.gitattributes
+.gitignore
+.idea/
+.claude/
+.omc/
+.byebug_history
+
+# Los propios ficheros de Docker no hacen falta dentro de la imagen.
+.dockerignore
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+
+# Artefactos de ejecución: se regeneran dentro del contenedor.
+log/*
+!log/.keep
+tmp/*
+!tmp/.keep
+storage/*
+!storage/.keep
+public/assets/
+public/packs/
+public/packs-test/
+app/assets/builds/
+app/assets/fonts/
+
+# node_modules se reinstala dentro de la imagen con `yarn install`. El pipeline
+# actual es Propshaft, con esbuild empaquetando el JS y Sass compilando el CSS.
+node_modules/
+yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# Secretos: RAILS_MASTER_KEY se inyecta como variable de entorno al desplegar.
+config/master.key
+config/credentials/*.key
+.env
+.env.*
+
+# Documentación generada.
+erd.pdf

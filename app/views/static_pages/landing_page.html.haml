@@ -1,134 +1,122 @@
 - content_for :title do
-  E-Learn 
-  \| 
-  Online Courses - Learn what you want
-.jumbotron.home-image
-  .display-4
-    What do you want to learn today?
-  
-  .p-4
+  E-Learn | Online Courses - Learn what you want
 
-  - if current_user
-    .p-3
-    = search_form_for @ransack_courses, as: :courses_search, url: courses_path do |f|
-      .input-group
-        = f.search_field :title_cont, class: 'form-control-lg', style: 'float: left; width: 200px; ', placeholder: 'Find a course', :autocomplete => :off
-        %span.input-group-append
-          %button.btn.btn-primary.btn-lg{:type => "submit"}
-            %span.fa.fa-search{"aria-hidden" => "true"}
-    .p-2
-  - else
-    %h3.text-shadow Join to access all the courses
-    .p-2
-    = link_to 'Register', new_user_registration_path, class: 'btn btn-custompurple btn-lg'
-    = link_to 'Login', new_user_session_path, class: 'btn btn-custompurple btn-lg'
-    .row.mt-1
-    = link_to user_google_oauth2_omniauth_authorize_path, method: :post, class: 'btn btn-danger btn-lg mr-1' do
-      Continue with
-      .fab.fa-google
-    .row.mt-1
-    = link_to user_github_omniauth_authorize_path, method: :post, class: 'btn btn-dark btn-lg mr-1' do
-      Continue with
-      .fab.fa-github
-    .row.mt-1
-    = link_to user_facebook_omniauth_authorize_path, method: :post, class: 'btn btn-primary btn-lg mr-1' do
-      Continue with
-      .fab.fa-facebook
-  /.form-inline.my-2.my-lg-0
-  /  = form_tag(courses_path, method: :get) do
-  /    .input-group
-  /      = text_field_tag :title, params[:title], autocomplete: 'off', placeholder: "Find a course", class: 'form-control-sm'
-  /      %span.input-group-append
-  /        %button.btn.btn-primary.btn-sm{:type => "submit"}
-  /          %span.fa.fa-search{"aria-hidden" => "true"}
+-# Portada. styles.md §5 (layout) y §6 (hero, estadísticas, tarjeta de curso).
+-# La rejilla usa row/col: .card-columns era de Bootstrap 4 y no existe en la 5,
+-# así que las tarjetas se apilaban en una sola columna.
 
-.card-group
-  .card.card-body
-    %h1
-      .fa.fa-graduation-cap
-    = pluralize(Course.approved.published.count, 'online courses')
-    .row
-    Explore a variety of fresh topics
-  .card.card-body
-    %h1
-      .fa.fa-chalkboard-teacher
-      /.fa.fa-brain
-    = Course.distinct.count(:user_id)
-    expert instructors
-    .row
-    Find the right instructor for you
-  .card.card-body
-    %h1
-      .fa.fa-user-graduate
-    = User.count
-    active learners
-    .row
-    Join the knowledge sharing community
-  .card.card-body
-    %h1
-      .fa.fa-infinity
-    Lifetime access
-    .row
-    Learn on your schedule
-%p
+%section.el-hero.mb-5
+  .text-center
+    %h1.el-display.el-hero__title What do you want to learn today?
+    %p.el-hero__lead.mb-4 Browse courses taught by people who do the work.
 
-- if current_user
-  %h2
-    .fa.fa-user-graduate
-    Continue Learning
-  .card-columns
-    - @purchased_courses.each do |course|
-      = render 'courses/course', course: course
-      %p
-  .text-right
-    = link_to 'All my purchased courses', purchased_courses_path
-  %hr
+    - if current_user
+      = search_form_for @ransack_courses, as: :courses_search, url: courses_path, html: { class: 'mx-auto', style: 'max-width: 34rem;' } do |f|
+        .input-group.input-group-lg
+          = f.search_field :title_cont, class: 'form-control', placeholder: 'Find a course',
+                           autocomplete: 'off', 'aria-label': 'Find a course'
+          %button.btn.btn-primary{ type: 'submit' }
+            %i.fa.fa-search{ 'aria-hidden': 'true' }
+            %span.ms-1 Search
+    - else
+      .d-flex.flex-wrap.justify-content-center.gap-2.mb-4
+        = link_to 'Get started', new_user_registration_path, class: 'btn btn-primary btn-lg'
+        = link_to 'Log in', new_user_session_path, class: 'btn btn-outline-light btn-lg'
 
-%h2
-  .fa.fa-chart-line
-  Popular courses
-.card-columns
-  - @popular.each do |course|
-    = render 'courses/course', course: course
-    %p
-.text-right
-  = link_to 'More popular courses', courses_path(courses_search: {s: 'enrollments_count desc'})
+      .d-flex.flex-wrap.justify-content-center.gap-2
+        = link_to user_google_oauth2_omniauth_authorize_path, data: { turbo_method: :post }, class: 'el-social__btn w-auto' do
+          %i.fab.fa-google{ 'aria-hidden': 'true' }
+          Continue with Google
+        = link_to user_github_omniauth_authorize_path, data: { turbo_method: :post }, class: 'el-social__btn w-auto' do
+          %i.fab.fa-github{ 'aria-hidden': 'true' }
+          Continue with GitHub
+        = link_to user_facebook_omniauth_authorize_path, data: { turbo_method: :post }, class: 'el-social__btn w-auto' do
+          %i.fab.fa-facebook{ 'aria-hidden': 'true' }
+          Continue with Facebook
 
-%hr
-%h2
-  .fa.fa-star
-  Top rated courses
-.card-columns
-  - @top_rated.each do |course|
-    = render 'courses/course', course: course
-    %p
-.text-right
-  = link_to 'Best rated courses', courses_path(courses_search: {s: 'average_rating desc'})
+%section.row.g-3.mb-5
+  .col-6.col-lg-3
+    .el-stat
+      %i.el-stat__icon.fa.fa-graduation-cap{ 'aria-hidden': 'true' }
+      .el-stat__value= Course.approved.published.count
+      .el-stat__label Online courses
+  .col-6.col-lg-3
+    .el-stat
+      %i.el-stat__icon.fa.fa-chalkboard-teacher{ 'aria-hidden': 'true' }
+      .el-stat__value= Course.distinct.count(:user_id)
+      .el-stat__label Expert instructors
+  .col-6.col-lg-3
+    .el-stat
+      %i.el-stat__icon.fa.fa-user-graduate{ 'aria-hidden': 'true' }
+      .el-stat__value= User.count
+      .el-stat__label Active learners
+  .col-6.col-lg-3
+    .el-stat
+      %i.el-stat__icon.fa.fa-infinity{ 'aria-hidden': 'true' }
+      .el-stat__value Lifetime
+      .el-stat__label Access, on your schedule
 
-%hr
-%h2
-  .fa.fa-clock
-  Latest courses
-.card-columns
-  - @latest.each do |course|
-    = render 'courses/course', course: course
-    %p
-.text-right
-  = link_to 'More new courses', courses_path(courses_search: {s: 'created_at desc'})
-%hr
-%h2 
-  .fa.fa-tags
-  Most popular tags
-- @popular_tags.each do |tag|
-  = link_to courses_path(courses_search: {course_tags_tag_id_eq: tag.id}) do
-    .badge.badge-info
-      = tag.name
-      %span.badge.badge-light
-        = tag.course_tags_count
-%hr
-%h2 
-  .fa.fa-comment
-  What our students have to say
-.card-columns
-  - @latest_good_reviews.each do |enrollment|
-    = render 'enrollments/enrollment', enrollment: enrollment
+- if current_user && @purchased_courses.any?
+  %section.mb-5
+    %header.el-page-header
+      %h2.el-page-header__title
+        %i.fa.fa-user-graduate{ 'aria-hidden': 'true' }
+        Continue learning
+      .el-page-header__actions
+        = link_to 'All my courses', purchased_courses_path, class: 'btn btn-outline-primary btn-sm'
+    .row.row-cols-1.row-cols-sm-2.row-cols-lg-3.g-4
+      - @purchased_courses.each do |course|
+        .col= render 'courses/course', course: course
+
+%section.mb-5
+  %header.el-page-header
+    %h2.el-page-header__title
+      %i.fa.fa-chart-line{ 'aria-hidden': 'true' }
+      Popular courses
+    .el-page-header__actions
+      = link_to 'See more', courses_path(courses_search: { s: 'enrollments_count desc' }), class: 'btn btn-outline-primary btn-sm'
+  .row.row-cols-1.row-cols-sm-2.row-cols-lg-3.g-4
+    - @popular.each do |course|
+      .col= render 'courses/course', course: course
+
+%section.mb-5
+  %header.el-page-header
+    %h2.el-page-header__title
+      %i.fa.fa-star{ 'aria-hidden': 'true' }
+      Top rated courses
+    .el-page-header__actions
+      = link_to 'See more', courses_path(courses_search: { s: 'average_rating desc' }), class: 'btn btn-outline-primary btn-sm'
+  .row.row-cols-1.row-cols-sm-2.row-cols-lg-3.g-4
+    - @top_rated.each do |course|
+      .col= render 'courses/course', course: course
+
+%section.mb-5
+  %header.el-page-header
+    %h2.el-page-header__title
+      %i.fa.fa-clock{ 'aria-hidden': 'true' }
+      Latest courses
+    .el-page-header__actions
+      = link_to 'See more', courses_path(courses_search: { s: 'created_at desc' }), class: 'btn btn-outline-primary btn-sm'
+  .row.row-cols-1.row-cols-sm-2.row-cols-lg-3.g-4
+    - @latest.each do |course|
+      .col= render 'courses/course', course: course
+
+- if @popular_tags.any?
+  %section.mb-5
+    %h2.mb-3
+      %i.fa.fa-tags{ 'aria-hidden': 'true' }
+      Most popular tags
+    .d-flex.flex-wrap.gap-2
+      - @popular_tags.each do |tag|
+        = link_to courses_path(courses_search: { course_tags_tag_id_eq: tag.id }), class: 'el-pill el-pill--info' do
+          = tag.name
+          %span.opacity-75= tag.course_tags_count
+
+- if @latest_good_reviews.any?
+  %section
+    %h2.mb-3
+      %i.fa.fa-comment{ 'aria-hidden': 'true' }
+      What our students have to say
+    .row.row-cols-1.row-cols-md-2.row-cols-lg-3.g-4
+      - @latest_good_reviews.each do |enrollment|
+        .col= render 'enrollments/enrollment', enrollment: enrollment

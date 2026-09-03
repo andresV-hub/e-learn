@@ -1,11 +1,13 @@
+-# Layout de los PDF (wicked_pdf). No comparte la hoja de la aplicación: los
+-# estilos van en pdf.scss, que wkhtmltopdf incrusta.
+-# Se retira onload="number_pages": esa función no existe en ningún bundle y
+-# wkhtmltopdf fallaba al evaluarla.
 !!!
 %html
   %head
-    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
-    %meta{:charset => "utf-8"}/
+    %meta{ 'http-equiv': 'Content-Type', content: 'text/html; charset=UTF-8' }/
+    %meta{ charset: 'utf-8' }/
     = wicked_pdf_stylesheet_link_tag "pdf"
-  %body{:onload => "number_pages"}
-    #header
-      /= wicked_pdf_image_tag 'logo_blue.png'
+  %body
     #content
       = yield

@@ -8,3 +8,6 @@ yarn.lock linguist-generated
 
 # Mark any vendored files as having been vendored.
 vendor/* linguist-vendored
+
+# Los binstubs se ejecutan dentro de contenedores Linux: forzar LF.
+bin/* text eol=lf

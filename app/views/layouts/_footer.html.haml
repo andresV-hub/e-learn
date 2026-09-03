@@ -1,10 +1,13 @@
-#footer.footer
-  %div.row
-    .col-8
-      Developed by Andrés Valiño
-      © #{Time.now.year.to_s}
-    .col-4
-      .float-right
-        = link_to privacy_policy_path, class: 'nav-link' do
-          .fa.fa-user-secret
-          Privacy Policy
+-# Pie. styles.md §5: navy corporativo, enlaces en azul 300 sobre fondo oscuro.
+%footer.el-footer
+  .container
+    .row.gy-3.align-items-center
+      .col-md-8
+        = image_tag 'logo.png', alt: 'E-Learn', height: 28, class: 'mb-2'
+        %p.mb-0
+          Developed by Andrés Valiño ©
+          = Time.current.year
+      .col-md-4.text-md-end
+        = link_to privacy_policy_path do
+          %i.fa.fa-user-secret{ 'aria-hidden': 'true' }
+          Privacy policy

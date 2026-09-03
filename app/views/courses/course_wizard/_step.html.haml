@@ -1,51 +1,50 @@
 - content_for :title do
-  E-Learn 
-  \| 
-  Editing course
-  = @course.title
+  E-Learn | Editing #{@course.title}
 
-= link_to 'Courses', courses_path
-|
-.fa.fa-graduation-cap
-= link_to course_path(@course) do
-  = @course.title
-|
-= link_to course_course_wizard_path(@course, :basic_info) do
-  Edit
-  = step.to_s.humanize
+-# Plantilla del asistente. styles.md §6.13.
+-# El indicador de pasos sustituye a las dos barras .progress que se pintaban
+-# con el mismo ancho y no reflejaban el avance real.
+%nav{ 'aria-label': 'Breadcrumb' }
+  %ol.breadcrumb
+    %li.breadcrumb-item= link_to 'Courses', courses_path
+    %li.breadcrumb-item= link_to @course.title, course_path(@course)
+    %li.breadcrumb-item.active{ 'aria-current': 'page' } Edit
 
-.card
-  .progress
-    .progress-bar{style: "width: #{@progress}%"}= number_to_percentage(@progress, precision: 0)
-  .progress
-    - wizard_steps.each do |s|
-      - @color = current_page?(course_course_wizard_path(@course, s)) ? "bg-success" : "bg-secondary"
-      /- if current_page?(course_course_wizard_path(@course, s))
-      /  - @color = 'bg-success'
-      /- else
-      /  - @color = 'bg-secondary'
-      = link_to course_course_wizard_path(@course, s), class: "progress-bar #{@color}", style: "width: #{@progress}%" do
-        = wizard_steps.index(s) + 1
-        = s.to_s.humanize
-  .card-header
-    %h5
-      = wizard_steps.index(step) + 1
-      \/
-      = wizard_steps.count
-      = step.to_s.humanize
-  .card-body
-    - if @course.errors.any?
-      .container.text-danger
-        - @course.errors.full_messages.each do |msg|
-          %li= msg
-      %p
-    = yield
-  .card-footer
-    .float-left
-      = link_to previous_wizard_path, class: 'btn btn-sm btn-info' do
-        .fa.fa-arrow-left
+.row.justify-content-center
+  .col-lg-9
+    %header.el-page-header
+      .el-page-header__lead
+        %span.el-page-header__eyebrow
+          = "Step #{wizard_steps.index(step) + 1} of #{wizard_steps.count}"
+        %h1.el-page-header__title= step.to_s.humanize
+
+    %ol.el-steps.mb-4
+      - wizard_steps.each_with_index do |s, i|
+        - current = current_page?(course_course_wizard_path(@course, s))
+        - done = i < wizard_steps.index(step)
+        %li.el-steps__item{ class: [('el-steps__item--current' if current), ('el-steps__item--done' if done && !current)].compact }
+          = link_to course_course_wizard_path(@course, s), class: 'd-flex align-items-center gap-2 text-reset text-decoration-none' do
+            %span.el-steps__index
+              - if done && !current
+                %i.fa.fa-check{ 'aria-hidden': 'true' }
+              - else
+                = i + 1
+            %span= s.to_s.humanize
+
+    %section.el-panel
+      .el-panel__body
+        - if @course.errors.any?
+          .alert.alert-danger{ role: 'alert' }
+            %ul.mb-0
+              - @course.errors.full_messages.each do |msg|
+                %li= msg
+
+        = yield
+
+    .d-flex.justify-content-between.gap-2
+      = link_to previous_wizard_path, class: 'btn btn-outline-primary' do
+        %i.fa.fa-arrow-left{ 'aria-hidden': 'true' }
         Previous
-    .float-right
-      = link_to next_wizard_path, class: 'btn btn-sm btn-info' do
-        .fa.fa-arrow-right
+      = link_to next_wizard_path, class: 'btn btn-outline-primary' do
         Skip
+        %i.fa.fa-arrow-right{ 'aria-hidden': 'true' }

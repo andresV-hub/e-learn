@@ -1,11 +1,14 @@
-.card
-    .card-header
-        = comment.created_at.strftime('%d-%m-%Y %H:%m')
-        (#{time_ago_in_words(comment.created_at)})
-        by
-        = link_to comment.user, user_path(comment.user)
-        - if policy(comment).destroy?
-            = link_to [@course, @lesson, comment], method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger' do
-                .fa.fa-trash
-    .card-body
-        = comment.content
+-# Comentario. styles.md §6 (el-comment).
+.el-comment
+  .flex-grow-1
+    .d-flex.flex-wrap.align-items-center.gap-2
+      %span.el-comment__author= link_to comment.user, user_path(comment.user)
+      %span.el-comment__date
+        = time_ago_in_words(comment.created_at)
+        ago
+      - if policy(comment).destroy?
+        = link_to [@course, @lesson, comment], data: { turbo_method: :delete, turbo_confirm: "Delete this comment? This can't be undone." },
+                  class: 'btn btn-sm btn-outline-danger ms-auto', title: 'Delete comment' do
+          %i.fa.fa-trash{ 'aria-hidden': 'true' }
+          %span.visually-hidden Delete comment
+    .el-comment__body= comment.content

@@ -1,6 +1,8 @@
 class CoursesController < ApplicationController
   skip_before_action :authenticate_user!, :only => [:show]
-  before_action :set_course, only: [:show, :edit, :update, :destroy, :approve, :unapprove, :analytics]
+  # :edit y :update no figuran aquí: este controlador no las define. La edición
+  # de un curso la lleva Courses::CourseWizardController (gem wicked).
+  before_action :set_course, only: [:show, :destroy, :approve, :unapprove, :analytics]
 
   # GET /courses or /courses.json
   def index

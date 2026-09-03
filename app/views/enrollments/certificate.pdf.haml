@@ -1,57 +1,51 @@
-%center
-  %div{:style => "width:1200px; height:800px; padding:20px; text-align:center; border: 10px solid #563d7c"}
-    %div{:style => "width:1150px; height:750px; padding:20px; text-align:center; border: 5px solid #563d7c"}
-      %br
-      %br
-      %br
-      %br
-      %span{:style => "font-size:50px; font-weight:bold"} Certificate of Completion
+-# Certificado. docs/imagen-de-marca.md §9: es la pieza que el alumno descarga y
+-# enseña, así que lleva el logotipo real (no logo_blue.png, que es un borrador
+-# de una taza de café), navy sobre blanco y sin fondos oscuros que arruinen la
+-# impresión. Los estilos van en línea porque wkhtmltopdf no comparte la hoja de
+-# la aplicación, y la maquetación va con tablas porque su motor (WebKit antiguo)
+-# no soporta flexbox ni grid de forma fiable.
+- ink = '#2a4054'
+- blue = '#21a8f4'
+- soft = '#64748b'
 
-      /%center
-      /  %h1 
-      /    Certificate of Completion
+%div{ style: "border: 8px solid #{blue}; padding: 6px; height: 100%; box-sizing: border-box;" }
+  %table{ role: 'presentation', width: '100%', height: '100%', cellpadding: '0', cellspacing: '0',
+          style: "border: 2px solid #{ink}; font-family: Helvetica, Arial, sans-serif; color: #{ink};" }
+    %tr
+      %td{ valign: 'middle', align: 'center', height: '100%', style: 'padding: 40px 60px 0;' }
 
-      %br
-      %br
-      %br
-      %br
-      %p
-      %h3
-        This is to certify that the owner of the email address
-      %h2
-        %u
-          = @enrollment.user.email
-      %h3
-        has successfully completed the course
-      %h2
-        %u
+        %div{ style: "text-transform: uppercase; letter-spacing: 5px; font-size: 13px; color: #{soft};" }
+          Certificate of completion
+
+        %div{ style: 'font-size: 42px; font-weight: bold; letter-spacing: -1px; margin: 20px 0 36px;' }
           = @enrollment.course.title
-      %h3
-        on the E-Learn platform
 
-      %p
-      
-      %br
-      %br
-      %br
-      %br
-      %b Certificate id: 
-      #{@enrollment.slug}
+        %div{ style: "font-size: 15px; color: #{soft};" } This certifies that
+        %div{ style: 'font-size: 30px; font-weight: bold; margin: 8px 0 4px;' }
+          = @enrollment.user.username
+        %div{ style: "font-size: 12px; color: #{soft};" }
+          = @enrollment.user.email
 
-      %p
+        %div{ style: "font-size: 15px; color: #{soft}; margin-top: 28px;" }
+          has successfully completed this course, taught by
+        %div{ style: 'font-size: 19px; font-weight: bold; margin-top: 4px;' }
+          = @enrollment.course.user.username
 
-      %b Certificate url: 
-      #{request.base_url}#{request.original_fullpath}
-
-      %p
-      %b Registration date: 
-      #{@enrollment.created_at.strftime('%d-%b-%Y')}
-
-      %br
-      %br
-      %br
-      %center
-        %h3
-          = image_tag wicked_pdf_asset_base64('logo_blue.png'), height: "30", width: "auto"
-          %p
-          e-learn-go.herokuapp.com
+    %tr
+      %td{ valign: 'bottom', style: 'padding: 0 40px 28px;' }
+        %div{ style: 'border-top: 1px solid #e2e8f0; padding-top: 16px;' }
+          %table{ role: 'presentation', width: '100%', cellpadding: '0', cellspacing: '0',
+                  style: "font-size: 11px; color: #{soft};" }
+            %tr
+              %td{ width: '33%', align: 'left', valign: 'top' }
+                %strong{ style: "color: #{ink};" } Completed
+                %br
+                = @enrollment.updated_at.strftime('%d %B %Y')
+              %td{ width: '34%', align: 'center', valign: 'top' }
+                = image_tag wicked_pdf_asset_base64('logo.png'), height: '30', width: 'auto', alt: 'E-Learn'
+                %br
+                e-learn-go.herokuapp.com
+              %td{ width: '33%', align: 'right', valign: 'top' }
+                %strong{ style: "color: #{ink};" } Certificate ID
+                %br
+                = @enrollment.slug

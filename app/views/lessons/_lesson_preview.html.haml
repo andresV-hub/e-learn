@@ -1,32 +1,37 @@
-- if current_user
-  /- if lesson.course.bought(current_user) || @course.user == current_user
-  - if policy(lesson).show?
-    - if lesson.viewed(current_user) == true
-      .text-success.fa.fa-check-square
-    - else
-      .text-danger.fa.fa-check-square
-  - else
-    .fa.fa-check-square
-  = link_to course_lesson_path(@course, lesson) do 
-    %b
-    = lesson.row_order_rank + 1
-    = lesson.title
-- else
-  .fa.fa-check-square
-  = link_to course_lesson_path(@course, lesson) do 
-    %b
-    = lesson.row_order_rank + 1
-    = lesson.title
+-# Fila del temario. styles.md §6 (el-lesson-list).
+-# El estado "vista / no vista" no puede ir solo por color (styles.md §9): el
+-# icono cambia de forma y lleva title, además de color.
+- viewed = current_user && policy(lesson).show? && lesson.viewed(current_user)
+%span.el-lesson-list__index= lesson.row_order_rank + 1
 
-.float-right
-  .fa.fa-comment
+- if current_user && policy(lesson).show?
+  - if viewed
+    %i.fa.fa-check-circle.text-success{ 'aria-hidden': 'true', title: 'Completed' }
+    %span.visually-hidden Completed
+  - else
+    %i.far.fa-circle.text-muted{ 'aria-hidden': 'true', title: 'Not completed yet' }
+    %span.visually-hidden Not completed yet
+- else
+  %i.fa.fa-lock.text-muted{ 'aria-hidden': 'true', title: 'Enroll to unlock' }
+  %span.visually-hidden Enroll to unlock
+
+%span.flex-grow-1
+  = link_to lesson.title, course_lesson_path(@course, lesson)
+
+%span.el-meta.d-none.d-sm-inline
+  %i.fa.fa-comment{ 'aria-hidden': 'true' }
   = lesson.comments_count
-  - if policy(lesson).edit?
-    .fa.fa-eye
-    Impressions:
-    = lesson.user_lessons.map(&:impressions).sum
-    .fa.fa-eye
-    Unique viewers:
+
+- if policy(lesson).edit?
+  %span.el-meta.d-none.d-md-inline{ title: 'Views / unique viewers' }
+    %i.fa.fa-eye{ 'aria-hidden': 'true' }
+    = lesson.user_lessons.sum(:impressions)
+    /
     = lesson.user_lessons_count
-    = link_to 'Edit', edit_course_lesson_path(@course, lesson), class: 'btn btn-sm btn-warning'
-    = link_to 'Destroy', [@course, lesson], method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger'
+  = link_to edit_course_lesson_path(@course, lesson), class: 'btn btn-sm btn-outline-primary', title: 'Edit lesson' do
+    %i.fa.fa-edit{ 'aria-hidden': 'true' }
+    %span.visually-hidden Edit lesson
+  = link_to [@course, lesson], data: { turbo_method: :delete, turbo_confirm: "Delete “#{lesson.title}”? This can't be undone." },
+            class: 'btn btn-sm btn-outline-danger', title: 'Delete lesson' do
+    %i.fa.fa-trash{ 'aria-hidden': 'true' }
+    %span.visually-hidden Delete lesson

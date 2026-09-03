@@ -1,66 +1,46 @@
-.card
-  .card-header
-    .fa.fa-user
-    - if user.online?
-      .text-success.fa.fa-signal
-    - else
-      .text-danger.fa.fa-signal
-    = link_to user.email, user_path(user)
-  .card-footer
+-# Ficha de usuario. Usa siempre la variable local `user`: antes mezclaba `user`
+-# y `@user`, así que el partial solo funcionaba desde users#show.
+%section.el-panel
+  .el-panel__body
+    .d-flex.align-items-center.gap-3.mb-3
+      - if user.image?
+        = image_tag user.image, size: '64x64', alt: '', class: 'rounded-circle'
+      - else
+        %i.fa.fa-user.fa-2x.text-muted{ 'aria-hidden': 'true' }
+      %div
+        %h1.h4.mb-1= user.username
+        %p.el-meta.mb-0
+          - if user.online?
+            %span.el-pill.el-pill--success Online
+          - else
+            %span.el-pill.el-pill--muted Offline
+          = "Joined #{time_ago_in_words(user.created_at)} ago"
+
+    - if user.roles.any?
+      .d-flex.flex-wrap.gap-1.mb-3
+        - user.roles.each do |role|
+          %span.el-pill.el-pill--info= role.name
+
+    .row.g-3.text-center
+      .col-6.col-md-3
+        .el-stat
+          .el-stat__value= user.courses_count
+          .el-stat__label Courses
+      .col-6.col-md-3
+        .el-stat
+          .el-stat__value= user.enrollments_count
+          .el-stat__label Enrollments
+      .col-6.col-md-3
+        .el-stat
+          .el-stat__value= user.comments_count
+          .el-stat__label Comments
+      .col-6.col-md-3
+        .el-stat
+          .el-stat__value= user.user_lessons_count
+          .el-stat__label Lessons seen
+
     - if user == current_user && user.uid.nil?
-      = link_to user_google_oauth2_omniauth_authorize_path, method: :post, class: 'btn btn-outline-primary btn-sm' do
-        .fab.fa-google
-        Sync with Google
-      %p
-    - if user.image?
-      .row
-      = image_tag user.image, size: '40x40', alt: "#{@user.email}", class: 'rounded-circle'
-    .row
-    = @user.name
-  .card-footer
-    Signed up
-    = time_ago_in_words(user.created_at)
-    ago
-  .card-footer
-    %b= 'sign_in_count'.humanize + ":"
-    = user.sign_in_count
-    .row
-    %b= 'current_sign_in_at'.humanize + ":"
-    = user.current_sign_in_at
-    .row
-    %b= 'last_sign_in_at'.humanize + ":"
-    = user.last_sign_in_at
-    .row
-    %b= 'current_sign_in_ip'.humanize + ":"
-    = user.current_sign_in_ip
-    .row
-    %b= 'last_sign_in_ip'.humanize + ":"
-    = user.last_sign_in_ip
-  .card-footer
-    .fa.fa-graduation-cap
-    Courses created:
-    = user.courses_count
-    .row
-    .fa.fa-lock-open
-    Enrollments:
-    = user.enrollments_count
-    .row
-    .fa.fa-comment
-    Comments:
-    = user.comments_count
-    .row
-    .fa.fa-eye
-    Lessons viewed:
-    = user.user_lessons_count
-  .card-footer
-    Confirmed email?
-    - if user.confirmed_at.present?
-      .badge.badge-success Yes
-    - else
-      .badge.badge-danger No
-  .card-footer
-    - user.roles.each do |role|
-      .badge.badge-info
-        = role.name
-    - if policy(user).edit?
-      = link_to 'Edit roles', edit_user_path(user), class: 'btn btn-sm btn-warning'
+      .mt-4.pt-3.border-top
+        = link_to user_google_oauth2_omniauth_authorize_path, data: { turbo_method: :post }, class: 'el-social__btn w-auto d-inline-flex' do
+          %i.fab.fa-google{ 'aria-hidden': 'true' }
+          Sync with Google

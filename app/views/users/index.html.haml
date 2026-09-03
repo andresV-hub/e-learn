@@ -1,84 +1,76 @@
 - content_for :title do
-  E-Learn 
-  \| 
-  All Users
+  E-Learn | All users
 
-%h3
-  .text-center
-    Users
-    .badge.badge-info
-      = @users.count
-%p
+-# styles.md §6.7: tabla en panel. Las columnas de auditoría (IPs, últimas
+-# sesiones) se ocultan por debajo de xl para que la tabla siga siendo legible.
+%header.el-page-header
+  .el-page-header__lead
+    %span.el-page-header__eyebrow Admin
+    %h1.el-page-header__title
+      Users
+      %span.el-pill.el-pill--info= @users.count
 
-/.card-columns
-/  - @users.each do |user|
-/    = render 'users/user', user: user
-.form-inline
-  = search_form_for @q do |f|
-    = f.search_field :email_cont, placeholder: 'email'
-    /= f.search_field :sign_in_count_eq, placeholder: 'sign in count'
-    /= f.search_field :email_or_sign_in_count_eq, placeholder: 'email or sign in count'
-    = f.submit
-  .ml-2
-  = link_to 'refresh', users_path
+%section.el-panel
+  .el-panel__body.el-filters
+    = search_form_for @q do |f|
+      .row.g-2.align-items-end
+        .col-md-6
+          = f.label :email_cont, 'Email'
+          = f.search_field :email_cont, class: 'form-control', placeholder: 'Email'
+        .col-md-6.d-flex.gap-2
+          = f.submit 'Search', class: 'btn btn-primary'
+          = link_to 'Clear filters', users_path, class: 'btn btn-link'
 
-%br
-.table-responsive
-  %table.table.table-bordered.table-striped.table-sm
-    %thead
-      %tr
-      %th id
-      %th= sort_link(@q, :email)
-      %th= sort_link(@q, :created_at)
-      %th= 'sign_in_count'.humanize
-      %th= 'current_sign_in_at'.humanize
-      %th= 'last_sign_in_at'.humanize
-      %th= 'current_sign_in_ip'.humanize
-      %th= 'last_sign_in_ip'.humanize
-      %th= sort_link(@q, :courses_count)
-      %th= sort_link(@q, :enrollments_count)
-      %th= sort_link(@q, :comments_count)
-      %th= sort_link(@q, :user_lessons_count)
-      %th Confirmed?
-      %th Roles
-    %tbody
-      - @users.each do |user|
+%section.el-panel
+  .table-responsive
+    %table.table.table-hover.align-middle.mb-0
+      %thead
         %tr
-          %td= user.id
-          %td
-            - if user.online?
-              .text-success.fa.fa-signal
-            - else
-              .text-danger.fa.fa-signal
-            = link_to user.email, user_path(user)
-          %td= user.created_at.strftime('%d/%m/%y - %H:%M')
-          %td= user.sign_in_count
-          %td= user.current_sign_in_at
-          %td= user.last_sign_in_at
-          %td= user.current_sign_in_ip
-          %td= user.last_sign_in_ip
-          %td= user.courses_count
-          %td= user.enrollments_count
-          %td= user.comments_count
-          %td= user.user_lessons_count
-          %td
-            - if user.confirmed?
-              .bg-success.badge.badge-info Yes
-            - else
-              .bg-danger.badge.badge-info No
-          %td
-            - user.roles.each do |role|
-              .badge.badge-info
-                = role.name
-            - if policy(user).edit?
-              = link_to 'Edit roles', edit_user_path(user), class: 'btn btn-sm btn-warning'
-%p
-!= pagy_bootstrap_nav(@pagy)            
-  
-%br 
-/  -if role.name.eql?('admin')
-/  -else
-/    .badge.badge-info
-/      = role.name
-/- if policy(user).edit?
-/  = link_to 'Edit roles', edit_user_path(user), class: 'btn btn-sm btn-warning'
+          %th= sort_link(@q, :email, 'User')
+          %th= sort_link(@q, :created_at, 'Signed up')
+          %th.text-end= sort_link(@q, :sign_in_count, 'Sign-ins')
+          %th.d-none.d-xl-table-cell Last seen
+          %th.d-none.d-xl-table-cell Last IP
+          %th.text-end= sort_link(@q, :courses_count, 'Courses')
+          %th.text-end= sort_link(@q, :enrollments_count, 'Enrollments')
+          %th.text-end.d-none.d-lg-table-cell= sort_link(@q, :comments_count, 'Comments')
+          %th.text-end.d-none.d-lg-table-cell= sort_link(@q, :user_lessons_count, 'Lessons')
+          %th Status
+          %th Roles
+      %tbody
+        - @users.each do |user|
+          %tr
+            %td
+              .d-flex.align-items-center.gap-2
+                - if user.online?
+                  %i.fa.fa-circle.text-success{ 'aria-hidden': 'true', title: 'Online' }
+                  %span.visually-hidden Online
+                - else
+                  %i.far.fa-circle.text-muted{ 'aria-hidden': 'true', title: 'Offline' }
+                  %span.visually-hidden Offline
+                = link_to user.email, user_path(user)
+            %td.el-meta= user.created_at.strftime('%d/%m/%y')
+            %td.text-end= user.sign_in_count
+            %td.el-meta.d-none.d-xl-table-cell
+              = user.last_sign_in_at&.strftime('%d/%m/%y %H:%M')
+            %td.el-meta.d-none.d-xl-table-cell= user.last_sign_in_ip
+            %td.text-end= user.courses_count
+            %td.text-end= user.enrollments_count
+            %td.text-end.d-none.d-lg-table-cell= user.comments_count
+            %td.text-end.d-none.d-lg-table-cell= user.user_lessons_count
+            %td
+              - if user.confirmed?
+                %span.el-pill.el-pill--success Confirmed
+              - else
+                %span.el-pill.el-pill--warning Pending
+            %td
+              .d-flex.flex-wrap.align-items-center.gap-1
+                - user.roles.each do |role|
+                  %span.el-pill.el-pill--info= role.name
+                - if policy(user).edit?
+                  = link_to edit_user_path(user), class: 'btn btn-sm btn-outline-primary', title: 'Edit roles' do
+                    %i.fa.fa-edit{ 'aria-hidden': 'true' }
+                    %span.visually-hidden Edit roles
+
+  .el-panel__body
+    != @pagy.series_nav(:bootstrap)

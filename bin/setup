@@ -17,13 +17,16 @@ FileUtils.chdir APP_ROOT do
   system! 'gem install bundler --conservative'
   system('bundle check') || system!('bundle install')
 
-  # Install JavaScript dependencies
-  system! 'bin/yarn'
+  # Dependencias de JavaScript. Ya no hay binstub bin/yarn: lo retiró la
+  # migración de Webpacker a jsbundling-rails, que invoca yarn directamente.
+  puts "\n== Installing JavaScript dependencies =="
+  system! 'yarn install --frozen-lockfile'
 
-  # puts "\n== Copying sample files =="
-  # unless File.exist?('config/database.yml')
-  #   FileUtils.cp 'config/database.yml.sample', 'config/database.yml'
-  # end
+  # esbuild empaqueta el JavaScript y Sass compila las hojas de estilo en
+  # app/assets/builds, que es de donde los sirve Propshaft.
+  puts "\n== Building assets =="
+  system! 'yarn build'
+  system! 'yarn build:css'
 
   puts "\n== Preparing database =="
   system! 'bin/rails db:prepare'

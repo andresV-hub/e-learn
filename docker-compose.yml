@@ -1,0 +1,82 @@
+name: e-learn
+
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: e_learn
+      POSTGRES_PASSWORD: e_learn
+      POSTGRES_DB: e_learn_development
+    volumes:
+      # PostgreSQL 18+ espera el montaje en /var/lib/postgresql (no en .../data),
+      # para que pg_upgrade pueda trabajar dentro del mismo punto de montaje.
+      - postgres-data:/var/lib/postgresql
+    ports:
+      # 5433 en el host para no chocar con un PostgreSQL instalado localmente,
+      # que suele ocupar el 5432. Ajustable con POSTGRES_PORT.
+      - "${POSTGRES_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U e_learn -d e_learn_development"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      target: development
+    command: bin/rails server -b 0.0.0.0 -p 3000
+    environment:
+      RAILS_ENV: development
+      DATABASE_HOST: db
+      DATABASE_PORT: "5432"
+      DATABASE_USER: e_learn
+      DATABASE_PASSWORD: e_learn
+    volumes:
+      # El código se monta desde el host para tener recarga en caliente.
+      - .:/rails
+      # tmp/ va en un volumen con nombre para que el del host (Windows) no pise
+      # el del contenedor (Linux). Las gemas NO se montan: viven en
+      # /usr/local/bundle dentro de la imagen, fuera de este bind mount, así que
+      # un volumen ahí solo serviría para ocultar las recién construidas.
+      - rails-tmp:/rails/tmp
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+
+  # esbuild y Sass en modo vigilancia. Van en servicios aparte, y no como un
+  # `bin/dev` con foreman dentro de `web`, para que cada proceso tenga su propio
+  # log y se pueda reiniciar solo. Escriben en app/assets/builds, que llega al
+  # contenedor `web` por el mismo bind mount del código, así que Propshaft sirve
+  # el resultado sin reiniciar Rails.
+  js:
+    build:
+      context: .
+      target: development
+    command: yarn build:watch
+    volumes:
+      - .:/rails
+      # node_modules del host son binarios de Windows: esbuild y sass traen
+      # ejecutables nativos por plataforma. Este volumen deja a la vista los que
+      # instaló la imagen (Linux) en lugar de los del bind mount.
+      - node-modules:/rails/node_modules
+    tty: true
+
+  css:
+    build:
+      context: .
+      target: development
+    command: yarn build:css:watch
+    volumes:
+      - .:/rails
+      - node-modules:/rails/node_modules
+    tty: true
+
+volumes:
+  postgres-data:
+  rails-tmp:
+  node-modules:

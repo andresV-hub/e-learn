@@ -1,24 +1,21 @@
 - content_for :title do
-  E-Learn 
-  \/
-  Course
-  = @course.title
-  \/
-  New lesson
+  E-Learn | #{@course.title} | New lesson
 
-= link_to 'Courses', courses_path
-\/
-= link_to @course.title, course_path(@course)
-\/
-new lesson
-%p
+%nav{ 'aria-label': 'Breadcrumb' }
+  %ol.breadcrumb
+    %li.breadcrumb-item= link_to 'Courses', courses_path
+    %li.breadcrumb-item= link_to @course.title, course_path(@course)
+    %li.breadcrumb-item.active{ 'aria-current': 'page' } New lesson
 
-.card
-  .card-header
-    %h3
-      .far.fa-check-square
-      New lesson
-  .card-body
-    = render 'form'
-  .card-footer
-    = link_to 'Back to course', course_path(@course)
+.row.justify-content-center
+  .col-lg-9
+    %header.el-page-header
+      .el-page-header__lead
+        %span.el-page-header__eyebrow Teach
+        %h1.el-page-header__title New lesson
+      .el-page-header__actions
+        = link_to 'Back to course', course_path(@course), class: 'btn btn-outline-primary btn-sm'
+
+    %section.el-panel
+      .el-panel__body
+        = render 'form'

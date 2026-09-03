@@ -1,5 +1,4 @@
 import Trix from "trix"
-import Rails from "@rails/ujs"
 
 let lang = Trix.config.lang;
 Trix.config.toolbar = {
@@ -88,12 +87,15 @@ class EmbedController {
   }
 
   fetch(value) {
-    Rails.ajax({
-      url: `/youtube/${encodeURIComponent(value)}`,
-      type: 'get',
-      error: this.reset.bind(this),
-      success: this.showEmbed.bind(this)
+    // Antes: Rails.ajax de @rails/ujs, que ya no forma parte del stack con
+    // Turbo. fetch cubre el mismo caso; el endpoint responde JSON con las
+    // claves { sgid, content }.
+    window.fetch(`/youtube/${encodeURIComponent(value)}`, {
+      headers: { Accept: "application/json" }
     })
+      .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+      .then((embed) => this.showEmbed(embed))
+      .catch(() => this.reset())
   }
 
   embed(event) {

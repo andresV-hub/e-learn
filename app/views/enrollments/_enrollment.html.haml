@@ -1,17 +1,25 @@
-.card
-  .card-header
-    .fa.fa-user
-    = link_to enrollment.user.username, user_path(enrollment.user)
-    .fa.fa-clock
-    = time_ago_in_words(enrollment.updated_at)
-    .fa.fa-graduation-cap
-    = link_to enrollment.course, course_path(enrollment.course)
+-# Reseña de un alumno. styles.md §6 (el-rating, el-panel).
+.card.h-100
   .card-body
-    .text-warning.fa.fa-star
-    %b= enrollment.rating
-    .fa.fa-comment
-    %small= enrollment.review
-  - if current_user
-    .card-footer
-      - if policy(enrollment).edit?
-        = link_to 'Edit Review', edit_enrollment_path(enrollment)
+    .d-flex.align-items-center.gap-2.mb-2
+      %i.fa.fa-user{ 'aria-hidden': 'true' }
+      %strong= link_to enrollment.user.username, user_path(enrollment.user)
+      %span.el-comment__date.ms-auto= "#{time_ago_in_words(enrollment.updated_at)} ago"
+
+    - if enrollment.rating.present?
+      .el-rating.mb-2
+        - 5.times do |i|
+          %i.fa.fa-star{ class: ('text-muted opacity-50' if i >= enrollment.rating.to_i), 'aria-hidden': 'true' }
+        %span.el-rating__value.ms-1= enrollment.rating
+        %span.visually-hidden= "Rated #{enrollment.rating} out of 5"
+
+    - if enrollment.review.present?
+      %p.el-comment__body= enrollment.review
+
+    %p.el-meta.mb-0
+      %i.fa.fa-graduation-cap{ 'aria-hidden': 'true' }
+      = link_to enrollment.course, course_path(enrollment.course)
+
+  - if current_user && policy(enrollment).edit?
+    .card-footer.bg-white
+      = link_to 'Edit review', edit_enrollment_path(enrollment), class: 'btn btn-sm btn-outline-primary'

@@ -272,8 +272,14 @@ Devise.setup do |config|
   # Add a new OmniAuth provider. Check the wiki for more information on setting
   # up on your models and hooks.
   # config.omniauth :github, 'APP_ID', 'APP_SECRET', scope: 'user,public_repo'
+  # Las credenciales de GitHub están anidadas bajo el entorno. Se accede con dig
+  # sobre un hash vacío por defecto: sin config/master.key (o RAILS_MASTER_KEY)
+  # `credentials` viene vacío y el antiguo encadenado con [] abortaba el arranque
+  # de la aplicación entera, incluido `assets:precompile`.
+  env_credentials = Rails.application.credentials[Rails.env.to_sym] || {}
+
   config.omniauth :google_oauth2, "#{Rails.application.credentials.dig(:google_oauth2, :client_id)}", "#{Rails.application.credentials.dig(:google_oauth2, :client_secret)}"
-  config.omniauth :github, "#{Rails.application.credentials[Rails.env.to_sym][:github][:client]}", "#{Rails.application.credentials[Rails.env.to_sym][:github][:secret]}", scope: 'user,public_repo'
+  config.omniauth :github, "#{env_credentials.dig(:github, :client)}", "#{env_credentials.dig(:github, :secret)}", scope: 'user,public_repo'
   config.omniauth :facebook, "#{Rails.application.credentials.dig(:facebook, :client)}", "#{Rails.application.credentials.dig(:facebook, :secret)}", scope: 'email,public_profile'
   # ==> Warden configuration
   # If you want to use other strategies, that are not supported by Devise, or

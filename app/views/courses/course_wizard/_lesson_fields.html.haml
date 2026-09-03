@@ -1,5 +1,6 @@
-.nested-fields.container.rounded
+-# .nested-fields es hook de cocoon-js: NO renombrar (styles.md §6.8).
+.nested-fields
   = f.input :title
   = f.input :content, as: :rich_text_area
-  .text-right
-    = link_to_remove_association "remove lesson", f, class: 'btn btn-sm btn-danger mb-1'
+  .text-end
+    = link_to_remove_association 'Remove lesson', f, class: 'btn btn-sm btn-outline-danger'

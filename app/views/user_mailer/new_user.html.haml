@@ -1,6 +1,6 @@
-New user registered:
-= link_to @user.email, user_url(@user)
-%p
-Regards, 
-.row
-= link_to 'The E-Learn team', root_url
+%h1{ style: 'font-size: 20px; margin: 0 0 16px;' } A new user just signed up
+%p{ style: 'margin: 0 0 16px;' }
+  = link_to @user.email, user_url(@user), style: 'color: #156c9c;'
+  joined E-Learn.
+%p{ style: 'margin: 24px 0 0; color: #64748b;' }
+  = link_to 'The E-Learn team', root_url, style: 'color: #156c9c;'

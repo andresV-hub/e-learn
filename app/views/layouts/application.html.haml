@@ -1,33 +1,32 @@
-%html
+!!!
+%html{ lang: 'en' }
   %head
-    %meta{description: 'Online Learning and Skill sharing platform'}/
-    %meta{keywords: 'online education, course platform, video tutorials, learn, know'}/
-    %meta{author: 'Andrés Valiño'}/
-    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
-    /%title E-Learn
     %title
       = content_for?(:title) ? yield(:title) : "E-Learn"
-    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
-    %meta{:content => "width=device-width, initial-scale=1.0", :name => "viewport"}/
-    %meta{:content => "width=device-width,initial-scale=1", :name => "viewport"}/
+    %meta{ charset: 'utf-8' }/
+    %meta{ name: 'viewport', content: 'width=device-width, initial-scale=1' }/
+    %meta{ name: 'description', content: 'Online Learning and Skill sharing platform' }/
+    %meta{ name: 'keywords', content: 'online education, course platform, video tutorials, learn, know' }/
+    %meta{ name: 'author', content: 'Andrés Valiño' }/
     = csrf_meta_tags
     = csp_meta_tag
-    = stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload'
-    = javascript_pack_tag 'application', 'data-turbolinks-track': 'reload'
-    = stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'reload'
-    = favicon_link_tag "logo_blue.png"
-    = javascript_include_tag "//www.google.com/jsapi"
-    %script{:src => "//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"}
-    %script{:src => "//netdna.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"}
-    %link{:href => "//netdna.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css", :rel => "stylesheet", :type => "text/css"}
+    -# Una sola hoja de estilos (Sass -> app/assets/builds/application.css) y un
+    -# solo bundle de JS (esbuild -> app/assets/builds/application.js).
+    -# Se han retirado las etiquetas CDN que había aquí: cargaban jQuery 1.11
+    -# DESPUÉS del bundle, pisando la 3.7 de la que dependen jQuery UI y
+    -# selectize, y metían Bootstrap 4.3 a competir con la 5.3 que compila Sass.
+    -# La Google JSAPI tampoco se usaba: Chartkick dibuja con Chart.js.
+    = stylesheet_link_tag 'application', media: 'all', 'data-turbo-track': 'reload'
+    = javascript_include_tag 'application', 'data-turbo-track': 'reload', defer: true
+    -# El birrete del logotipo, no logo_blue.png: ese fichero es un borrador de
+    -# una taza de café. Ver docs/imagen-de-marca.md §10.
+    = favicon_link_tag "favicon.png"
     - if Rails.env.production?
       = render 'layouts/google_analytics'
-  %body
+  %body.d-flex.flex-column.min-vh-100
     = render "layouts/header"
-    = render 'layouts/messages'
-    .container
-      %p
-      = yield
-    %br
-    .purple-background.text-light
-      = render 'layouts/footer'
+    %main.flex-grow-1
+      .container.py-4
+        = render 'layouts/messages'
+        = yield
+    = render 'layouts/footer'

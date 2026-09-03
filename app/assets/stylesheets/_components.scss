@@ -1,0 +1,580 @@
+// Componentes propios de E-Learn. Implementa styles.md §6.
+//
+// Se importa DESPUÉS de Bootstrap: estas clases se apoyan en el framework y en
+// algún punto lo matizan. Los tokens vienen de _brand.scss.
+//
+// JS hooks preservados (NO renombrar; se consultan desde app/javascript):
+//   .selectize, .selectize-tags  -> application.js, inicializa Selectize
+//   .nested-fields               -> cocoon-js, campos anidados del asistente
+//   .lesson-sortable             -> jQuery UI sortable
+//   .ui-state-highlight          -> placeholder del sortable
+//   video (etiqueta)             -> application.js bloquea el menú contextual
+
+// --- Tokens expuestos como variables CSS ------------------------------------
+// Permiten usar la paleta desde CSS suelto sin recompilar Sass.
+:root {
+  --el-blue-50:  #{$el-blue-50};
+  --el-blue-100: #{$el-blue-100};
+  --el-blue-200: #{$el-blue-200};
+  --el-blue-300: #{$el-blue-300};
+  --el-blue-400: #{$el-blue-400};
+  --el-blue-500: #{$el-blue-500};
+  --el-blue-600: #{$el-blue-600};
+  --el-blue-700: #{$el-blue-700};
+  --el-blue-800: #{$el-blue-800};
+  --el-blue-900: #{$el-blue-900};
+
+  --el-ink:       #{$el-ink};
+  --el-ink-muted: #{$el-ink-muted};
+  --el-ink-soft:  #{$el-ink-soft};
+  --el-border:    #{$el-border};
+  --el-canvas:    #{$el-canvas};
+  --el-surface:   #{$el-surface};
+  --el-on-ink:    #{$el-on-ink};
+
+  --el-success: #{$el-success};
+  --el-warning: #{$el-warning};
+  --el-danger:  #{$el-danger};
+  --el-info:    #{$el-info};
+
+  --el-shadow-card:       0 1px 2px rgba(42, 64, 84, .06);
+  --el-shadow-card-hover: 0 6px 16px rgba(42, 64, 84, .12);
+}
+
+// --- Tipografía (styles.md §3) ----------------------------------------------
+body {
+  background-color: $el-canvas;
+  color: $el-ink;
+}
+
+h1, .el-title {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: $el-ink;
+}
+
+h2 { font-size: 1.25rem; font-weight: 600; }
+
+.el-display {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+}
+
+.el-lead   { font-size: 1.05rem; color: $el-ink-muted; }
+.el-meta   { font-size: .9rem;   color: $el-ink-muted; }
+.el-prose  { max-width: 75ch; line-height: 1.6; }
+
+// --- Cabecera de página (styles.md §5) --------------------------------------
+.el-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: 1.5rem;
+
+  &__lead { min-width: 0; }
+
+  &__eyebrow {
+    display: block;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: $el-ink-soft;
+    margin-bottom: .15rem;
+  }
+
+  &__title { margin: 0; }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+}
+
+// --- Panel (styles.md §6.4) --------------------------------------------------
+.el-panel {
+  background: $el-surface;
+  border: 1px solid $el-border;
+  border-radius: .75rem;
+  box-shadow: var(--el-shadow-card);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+
+  &__head {
+    padding: .85rem 1.25rem;
+    background: $el-canvas;
+    border-bottom: 1px solid $el-border;
+
+    h2, h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+  }
+
+  &__body { padding: clamp(1rem, 2vw, 1.5rem); }
+}
+
+// --- Píldoras de estado (styles.md §6.2) ------------------------------------
+// Sustituyen a `badge badge-*`, que es Bootstrap 4 y no existe en Bootstrap 5.
+.el-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .2rem .65rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: rgba($el-ink-soft, .12);
+  color: $el-ink-muted;
+
+  &--success { background: $el-success-bg; color: $el-success; }
+  &--warning { background: $el-warning-bg; color: $el-warning; }
+  &--danger  { background: $el-danger-bg;  color: $el-danger; }
+  &--info    { background: $el-info-bg;    color: $el-info; }
+  &--muted   { background: rgba($el-ink-soft, .12); color: $el-ink-muted; }
+}
+
+a.el-pill:hover { filter: brightness(.96); }
+
+// --- Tarjeta de curso (styles.md §6.1) --------------------------------------
+.el-course-card {
+  height: 100%;
+  border: 1px solid $el-border;
+  border-radius: .75rem;
+  box-shadow: var(--el-shadow-card);
+  transition: box-shadow 160ms ease, transform 160ms ease;
+  overflow: hidden;
+
+  &:hover,
+  &:focus-within {
+    box-shadow: var(--el-shadow-card-hover);
+    transform: translateY(-2px);
+  }
+
+  // Portada 16:9 constante, venga la imagen que venga del profesor.
+  &__cover {
+    display: block;
+    aspect-ratio: 16 / 9;
+    background: $el-blue-100;
+    overflow: hidden;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  // Marcador cuando el curso no tiene portada.
+  &__cover--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $el-blue-500;
+    font-size: 2.5rem;
+  }
+
+  &__title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: .35rem;
+
+    a { color: $el-ink; }
+    a:hover { color: $el-blue-700; }
+  }
+
+  &__teacher {
+    font-size: .85rem;
+    color: $el-ink-muted;
+    margin-bottom: .6rem;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .9rem;
+    font-size: .85rem;
+    color: $el-ink-soft;
+
+    span { display: inline-flex; align-items: center; gap: .3rem; }
+  }
+
+  &__price {
+    font-weight: 700;
+    color: $el-ink;
+  }
+}
+
+// --- Progreso (styles.md §6.5) ----------------------------------------------
+.el-progress {
+  &__bar {
+    height: 8px;
+    border-radius: 999px;
+    background: $el-blue-100;
+    overflow: hidden;
+  }
+
+  &__fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: $el-blue-600;
+    transition: width 300ms ease;
+  }
+
+  // El color nunca comunica solo: la etiqueta es obligatoria (styles.md §2).
+  &__label {
+    display: block;
+    margin-top: .35rem;
+    font-size: .85rem;
+    color: $el-ink-muted;
+  }
+}
+
+// --- Filtros del catálogo (styles.md §6.6) ----------------------------------
+.el-filters {
+  &__group { margin-bottom: .9rem; }
+
+  label {
+    display: block;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: $el-ink-soft;
+    margin-bottom: .25rem;
+  }
+}
+
+// --- Portada / hero (styles.md §5) ------------------------------------------
+.el-hero {
+  position: relative;
+  border-radius: .75rem;
+  overflow: hidden;
+  padding: clamp(2rem, 6vw, 4.5rem) clamp(1.25rem, 4vw, 3rem);
+  color: $el-on-ink;
+  background-color: $el-ink;
+  // URL relativa a propósito: Propshaft reescribe las url() del CSS a la ruta
+  // con digest del asset. `image-url()` es de sass-rails y aquí no existe: Sass
+  // la emitiría tal cual y el navegador la ignoraría.
+  background-image: url("home-photo.jpg");
+  background-size: cover;
+  background-position: center;
+
+  // Capa de contraste: sin ella el texto sobre la foto no cumple §9.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(42, 64, 84, .92), rgba(42, 64, 84, .70));
+  }
+
+  > * { position: relative; }
+
+  &__title { color: #fff; }
+  &__lead  { color: $el-on-ink; font-size: 1.1rem; }
+}
+
+// --- Estadísticas de la portada ---------------------------------------------
+.el-stat {
+  background: $el-surface;
+  border: 1px solid $el-border;
+  border-radius: .75rem;
+  padding: 1.25rem;
+  height: 100%;
+  text-align: center;
+
+  &__icon  { font-size: 1.75rem; color: $el-blue-500; margin-bottom: .5rem; }
+  &__value { font-size: 1.75rem; font-weight: 700; color: $el-ink; line-height: 1.1; }
+  &__label { font-size: .9rem; color: $el-ink-muted; }
+}
+
+// --- Estado vacío ------------------------------------------------------------
+.el-empty {
+  text-align: center;
+  padding: clamp(2rem, 6vw, 3.5rem) 1rem;
+  color: $el-ink-muted;
+
+  &__icon { font-size: 2.5rem; color: $el-blue-300; margin-bottom: .75rem; }
+  &__title { font-weight: 600; color: $el-ink; margin-bottom: .25rem; }
+}
+
+// --- Autenticación -----------------------------------------------------------
+.el-auth {
+  max-width: 26rem;
+  margin: clamp(1.5rem, 5vw, 3rem) auto;
+
+  &__logo { display: block; margin: 0 auto 1.25rem; height: 48px; width: auto; }
+  &__title { text-align: center; margin-bottom: 1.25rem; }
+
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin: 1.25rem 0;
+    color: $el-ink-soft;
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+
+    &::before, &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: $el-border;
+    }
+  }
+}
+
+// Botones de acceso social: identidad de cada proveedor, forma del sistema.
+.el-social {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    width: 100%;
+    padding: .5rem 1rem;
+    border-radius: .5rem;
+    border: 1px solid $el-border;
+    background: $el-surface;
+    color: $el-ink;
+    font-weight: 500;
+    transition: background-color 160ms ease, border-color 160ms ease;
+
+    &:hover { background: $el-canvas; border-color: $el-blue-200; color: $el-ink; }
+  }
+}
+
+// --- Cabecera y pie ----------------------------------------------------------
+.el-navbar {
+  background: $el-ink;
+
+  .navbar-brand img { height: 34px; width: auto; }
+
+  .nav-link {
+    color: rgba($el-on-ink, .85);
+    &:hover, &:focus { color: #fff; }
+  }
+
+  .nav-link.active { color: #fff; font-weight: 600; }
+
+  .dropdown-menu { border-color: $el-border; border-radius: .5rem; }
+}
+
+.el-footer {
+  background: $el-ink;
+  color: rgba($el-on-ink, .85);
+  padding: 2rem 0;
+  margin-top: 3rem;
+
+  a { color: $el-blue-300; }
+  a:hover { color: #fff; }
+}
+
+// --- Aula (lección) ----------------------------------------------------------
+.el-lesson-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .6rem 1rem;
+    border-bottom: 1px solid $el-border;
+    color: $el-ink;
+
+    &:last-child { border-bottom: 0; }
+    &:hover { background: $el-blue-50; }
+
+    &--current {
+      background: $el-blue-50;
+      box-shadow: inset 3px 0 0 $el-blue-600;
+      font-weight: 600;
+    }
+  }
+
+  &__index {
+    flex: 0 0 1.75rem;
+    height: 1.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba($el-ink-soft, .12);
+    color: $el-ink-muted;
+    font-size: .8rem;
+    font-weight: 600;
+  }
+
+  &__item--done &__index { background: $el-success-bg; color: $el-success; }
+}
+
+.el-video {
+  border-radius: .75rem;
+  overflow: hidden;
+  background: #000;
+
+  video { display: block; width: 100%; }
+}
+
+// --- Comentarios -------------------------------------------------------------
+.el-comment {
+  display: flex;
+  gap: .75rem;
+  padding: .9rem 0;
+  border-bottom: 1px solid $el-border;
+
+  &:last-child { border-bottom: 0; }
+
+  &__author { font-weight: 600; color: $el-ink; }
+  &__date   { font-size: .8rem; color: $el-ink-soft; }
+  &__body   { color: $el-ink-muted; margin-top: .2rem; }
+}
+
+// --- Valoración --------------------------------------------------------------
+.el-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  color: #f59e0b; // Ámbar de estrella: convención universal, no es token de estado.
+
+  &__value { color: $el-ink; font-weight: 600; }
+}
+
+// --- Ajustes sobre Bootstrap y librerías de terceros -------------------------
+
+// Alertas: borde izquierdo de 4px sobre fondo suave (styles.md §6.10).
+.alert {
+  border: 1px solid $el-border;
+  border-left-width: 4px;
+  border-radius: .5rem;
+}
+.alert-success { border-left-color: $el-success; background: $el-success-bg; color: $el-success; }
+.alert-warning { border-left-color: $el-warning; background: $el-warning-bg; color: $el-warning; }
+.alert-danger  { border-left-color: $el-danger;  background: $el-danger-bg;  color: $el-danger; }
+.alert-info    { border-left-color: $el-info;    background: $el-info-bg;    color: $el-info; }
+
+.card { border-color: $el-border; }
+
+.table {
+  background: $el-surface;
+
+  > thead th {
+    background: $el-canvas;
+    color: $el-ink-soft;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+}
+
+// simple_form marca los campos con estas clases; los iconos de Bootstrap
+// sobran porque el mensaje de error ya va debajo del campo.
+.form-control.is-invalid,
+.form-control.is-valid { background-image: none; }
+
+trix-editor.form-control { height: auto; }
+
+// Cocoon: cada bloque de lección del asistente. `.nested-fields` es hook de JS.
+.nested-fields {
+  background: $el-surface;
+  border: 1px solid $el-border;
+  border-radius: .75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--el-shadow-card);
+  transition: box-shadow 160ms ease;
+
+  &:hover { box-shadow: var(--el-shadow-card-hover); }
+}
+
+// jQuery UI sortable: hueco de destino al arrastrar una lección.
+.ui-state-highlight {
+  height: 3rem;
+  border: 2px dashed $el-blue-300;
+  border-radius: .5rem;
+  background: $el-blue-50;
+}
+
+// Selectize: los tokens de etiqueta se alinean con .el-pill--info.
+.selectize-control.multi .selectize-input > div {
+  background: $el-info-bg;
+  color: $el-info;
+  border-radius: 999px;
+  padding: .1rem .55rem;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.selectize-input {
+  border-color: $el-border;
+  border-radius: .5rem;
+}
+
+.selectize-input.focus {
+  border-color: $el-blue-500;
+  box-shadow: 0 0 0 3px rgba($el-blue-500, .35);
+}
+
+// --- Asistente de creación de curso (styles.md §6.13) -----------------------
+// Indicador de pasos. Sustituye a las dos barras .progress superpuestas que
+// había antes, que se pintaban con el mismo ancho y no indicaban nada.
+.el-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  &__item {
+    flex: 1 1 8rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .6rem .75rem;
+    border: 1px solid $el-border;
+    border-radius: .5rem;
+    background: $el-surface;
+    color: $el-ink-muted;
+    font-size: .85rem;
+    font-weight: 600;
+
+    &:hover { border-color: $el-blue-200; color: $el-ink; }
+
+    // El paso actual no se distingue solo por color: gana borde y peso.
+    &--current {
+      border-color: $el-blue-600;
+      background: $el-blue-50;
+      color: $el-blue-800;
+      box-shadow: inset 0 0 0 1px $el-blue-600;
+    }
+
+    &--done { color: $el-success; border-color: $el-success-bg; background: $el-success-bg; }
+  }
+
+  &__index {
+    flex: 0 0 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba($el-ink-soft, .15);
+    font-size: .75rem;
+  }
+
+  &__item--current &__index { background: $el-blue-600; color: #fff; }
+  &__item--done &__index    { background: $el-success; color: #fff; }
+}

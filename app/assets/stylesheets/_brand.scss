@@ -1,0 +1,89 @@
+// Tokens de marca de E-Learn.
+//
+// Se importa ANTES que Bootstrap: aquí se redefinen las variables Sass del
+// framework, de modo que botones, enlaces, alertas y formularios salen ya con la
+// paleta de marca sin necesidad de sobrescribir reglas después.
+//
+// Fuente: docs/imagen-de-marca.md §6 y styles.md §2. Los colores están
+// muestreados del logotipo (app/assets/images/logo.png) y sus contrastes
+// medidos según WCAG 2.1. No añadir un color aquí sin documentarlo antes allí.
+
+// --- Escala del azul de marca ------------------------------------------------
+// Derivada de #21a8f4 (el birrete del logotipo).
+$el-blue-50:  #edf8fe;
+$el-blue-100: #dbf1fd;
+$el-blue-200: #b4e1fb;
+$el-blue-300: #83cef9;
+$el-blue-400: #4db9f6;
+$el-blue-500: #21a8f4; // Color de marca. NO usar como texto sobre blanco (2.63:1).
+$el-blue-600: #1a86c3;
+$el-blue-700: #156c9c; // Texto y enlaces sobre blanco (5.74:1, AA).
+$el-blue-800: #105175;
+$el-blue-900: #0b3953;
+
+// --- Neutros -----------------------------------------------------------------
+$el-ink:       #2a4054; // Tinta principal. 10.72:1 sobre blanco (AAA).
+$el-ink-muted: #3d566e;
+$el-ink-soft:  #64748b;
+$el-border:    #e2e8f0;
+$el-canvas:    #f6f9fc;
+$el-surface:   #ffffff;
+$el-on-ink:    #ebedf0; // Texto sobre navy. 9.14:1 (AAA).
+
+// --- Semánticos --------------------------------------------------------------
+$el-success:    #15803d;
+$el-success-bg: #ecfdf5;
+$el-warning:    #b45309;
+$el-warning-bg: #fffbeb;
+$el-danger:     #b91c1c;
+$el-danger-bg:  #fef2f2;
+$el-info:       #156c9c;
+$el-info-bg:    #edf8fe;
+
+// --- Overrides de Bootstrap --------------------------------------------------
+// $primary es el 700, no el 500: Bootstrap deriva el color del texto de los
+// botones con color-contrast(), y sobre el 500 (#21a8f4) elegiría texto negro y
+// el resultado no llegaría a AA. Con el 700 el texto sale blanco a 5.74:1.
+$primary:   $el-blue-700;
+$secondary: $el-ink-soft;
+$success:   $el-success;
+$warning:   $el-warning;
+$danger:    $el-danger;
+$info:      $el-info;
+$light:     $el-canvas;
+$dark:      $el-ink;
+
+$body-bg:    $el-canvas;
+$body-color: $el-ink;
+
+$link-color:            $el-blue-700;
+$link-hover-color:      $el-blue-800;
+$link-decoration:       none;
+$link-hover-decoration: underline;
+
+// Radios: tarjetas y paneles 12px, controles 8px (styles.md §4).
+$border-radius:    .5rem;
+$border-radius-sm: .375rem;
+$border-radius-lg: .75rem;
+$border-radius-xl: .75rem;
+
+$border-color: $el-border;
+
+// Foco de marca (styles.md §4 y §9).
+$focus-ring-width:   3px;
+$focus-ring-opacity: .35;
+$focus-ring-color:   rgba($el-blue-500, $focus-ring-opacity);
+
+$input-btn-focus-width:      3px;
+$input-btn-focus-color-opacity: .35;
+$input-btn-focus-color:      rgba($el-blue-500, .35);
+
+$card-border-color:  $el-border;
+$card-cap-bg:        $el-canvas;
+$card-border-radius: .75rem;
+
+$headings-color:      $el-ink;
+$headings-font-weight: 600;
+
+$table-border-color: $el-border;
+$table-hover-bg:     $el-blue-50;

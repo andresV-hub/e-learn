@@ -1,34 +1,40 @@
 - content_for :title do
-  E-Learn 
-  |
-  = @course.title
-  Analytics
+  E-Learn | #{@course.title} analytics
 
-= link_to 'Courses', courses_path
-|
-= link_to course_path(@course) do
-  .fa.fa-graduation-cap
-  = @course.title
-|
-= link_to analytics_course_path(@course) do
-  .fa.fa-chart-bar
-  Analytics
+-# styles.md §5: cada gráfico en su panel, rejilla de 2 columnas en lg+.
+%nav{ 'aria-label': 'Breadcrumb' }
+  %ol.breadcrumb
+    %li.breadcrumb-item= link_to 'Courses', courses_path
+    %li.breadcrumb-item= link_to @course.title, course_path(@course)
+    %li.breadcrumb-item.active{ 'aria-current': 'page' } Analytics
 
-/%h4.text-center 
-/  Analtycs for #{@course.title}
-%h4.text-center
-  Enrollments per day, quantity
-= line_chart @course.enrollments.group_by_day(:created_at).count
+%header.el-page-header
+  .el-page-header__lead
+    %span.el-page-header__eyebrow Analytics
+    %h1.el-page-header__title= @course.title
 
-%h4.text-center
-  Enrollments per day, revenue
-= line_chart @course.enrollments.group_by_day(:created_at).sum(:price)
-
-%h4.text-center
-  Unique user views (how many unique users viewed the lesson)
-= bar_chart @course.user_lessons.joins(:lesson).group(:'lessons.title').count
-
-%h4.text-center
-  Impressions per lesson (how many times the lesson was opened)
-= bar_chart @course.user_lessons.joins(:lesson).group(:'lessons.title').sum(:impressions)
-
+.row.g-4
+  .col-lg-6
+    %section.el-panel.h-100
+      .el-panel__head
+        %h2 Enrollments per day
+      .el-panel__body
+        = line_chart @course.enrollments.group_by_day(:created_at).count, colors: ['#156c9c']
+  .col-lg-6
+    %section.el-panel.h-100
+      .el-panel__head
+        %h2 Revenue per day
+      .el-panel__body
+        = line_chart @course.enrollments.group_by_day(:created_at).sum(:price), colors: ['#15803d']
+  .col-lg-6
+    %section.el-panel.h-100
+      .el-panel__head
+        %h2 Unique viewers per lesson
+      .el-panel__body
+        = bar_chart @course.user_lessons.joins(:lesson).group(:'lessons.title').count, colors: ['#21a8f4']
+  .col-lg-6
+    %section.el-panel.h-100
+      .el-panel__head
+        %h2 Views per lesson
+      .el-panel__body
+        = bar_chart @course.user_lessons.joins(:lesson).group(:'lessons.title').sum(:impressions), colors: ['#4db9f6']

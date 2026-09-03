@@ -1,79 +1,78 @@
 - content_for :title do
-  E-Learn 
-  | 
-  = @course.title
+  E-Learn | #{@course.title}
 
-.row
+-# Ficha de curso. styles.md §5: dos columnas en lg+, y en móvil el panel de
+-# compra sube por encima del temario (order-0 / order-lg-2).
+.row.g-4
   .col-lg-8.order-1.order-lg-1
-    .jumbotron
-      %h3
-        .fa.fa-graduation-cap
-        = @course.title
-        /.row
-        /HAS AVATAR?
-        /= @course.avatar.attached?
-        /- if @course.avatar.attached?
-        /  = image_tag @course.avatar, width: "200px"
-      %hr
-      .fa.fa-clock
-      Created
-      = @course.created_at.strftime("%m/%Y")
-      .row
-      .fa.fa-clock
-      Last updated
-      = @course.updated_at.strftime("%m/%Y")
-      .row
-      .fa.fa-globe-africa
-      = @course.language
-      .row
-      .fa.fa-signal
-      = @course.level
-      .row
-      .fa.fa-file-pdf
-      Certificate of Completion
-      %hr
-      = @course.description
+    %header.el-page-header
+      .el-page-header__lead
+        %span.el-page-header__eyebrow Course
+        %h1.el-page-header__title= @course.title
 
-    %h4
-      .fa.fa-tasks
-      = pluralize(@course.lessons_count, 'lesson')
-      /Lessons:
-      /= @course.lessons_count
-      .float-right
-        .fa.fa-spinner
-        = number_to_percentage(@course.progress(current_user), precision: 0)
-        /= certificate_button(@course)
-    %ul.list-group
-      - @lessons.each do |lesson|
-        %li.list-group-item
-          = render 'lessons/lesson_preview', lesson: lesson
-    %p
+    %section.el-panel
+      .el-panel__body
+        .el-course-card__meta.mb-3
+          %span
+            %i.fa.fa-globe-africa{ 'aria-hidden': 'true' }
+            = @course.language
+          %span
+            %i.fa.fa-signal{ 'aria-hidden': 'true' }
+            = @course.level
+          %span
+            %i.fa.fa-clock{ 'aria-hidden': 'true' }
+            Updated #{@course.updated_at.strftime('%m/%Y')}
+          %span
+            %i.fa.fa-file-pdf{ 'aria-hidden': 'true' }
+            Certificate of completion
 
-    %h4
-      .fa.fa-comment
-      = pluralize(@enrollments_with_review.count, 'review')
-      /Reviews:
-      /= @enrollments_with_review.count
-    - @enrollments_with_review.each do |enrollment|
-      = render 'enrollments/enrollment', enrollment: enrollment
-      %p
+        .el-prose= @course.description
 
+    %section.el-panel
+      .el-panel__head.d-flex.flex-wrap.align-items-center.justify-content-between.gap-2
+        %h2
+          %i.fa.fa-tasks{ 'aria-hidden': 'true' }
+          = pluralize(@course.lessons_count, 'lesson')
+        - progress = course_progress(@course)
+        - if progress
+          %span.el-meta #{progress}% complete
+      - if @lessons.any?
+        %ul.el-lesson-list
+          - @lessons.each do |lesson|
+            %li.el-lesson-list__item
+              = render 'lessons/lesson_preview', lesson: lesson
+      - else
+        .el-panel__body
+          .el-empty
+            %i.el-empty__icon.fa.fa-tasks{ 'aria-hidden': 'true' }
+            .el-empty__title No lessons yet
+            %p.mb-0 This course is still being put together.
 
-  .col-lg-4.order-0.order-lg-1
-    .sticky-top
+    %section.el-panel
+      .el-panel__head
+        %h2
+          %i.fa.fa-comment{ 'aria-hidden': 'true' }
+          = pluralize(@enrollments_with_review.count, 'review')
+      .el-panel__body
+        - if @enrollments_with_review.any?
+          .row.row-cols-1.row-cols-md-2.g-3
+            - @enrollments_with_review.each do |enrollment|
+              .col= render 'enrollments/enrollment', enrollment: enrollment
+        - else
+          .el-empty.py-3
+            .el-empty__title No reviews yet
+            %p.mb-0 Be the first to share what you thought.
+
+  .col-lg-4.order-0.order-lg-2
+    .position-sticky{ style: 'top: 1rem;' }
       = render 'courses/course', course: @course
-    %p
-%h4 
-  .fa.fa-graduation-cap
-  Similar Courses
 
-/Current course tags
-/= @course.tags.pluck(:id)
-/.row
-/All course tags
-- Course.all.where.not(id: @course.id).each do |course|
-  .row
-  /= course.tags.pluck(:id)
-  - unless @course.tags.pluck(:id).intersection(course.tags.pluck(:id)).count.zero?
-    .card-columns
-      = render 'courses/course', course: course
+- similar = Course.published.approved.where.not(id: @course.id).joins(:tags).where(tags: { id: @course.tags.select(:id) }).distinct.limit(3)
+- if similar.any?
+  %section.mt-5
+    %h2.mb-3
+      %i.fa.fa-graduation-cap{ 'aria-hidden': 'true' }
+      Similar courses
+    .row.row-cols-1.row-cols-md-2.row-cols-lg-3.g-4
+      - similar.each do |course|
+        .col= render 'courses/course', course: course

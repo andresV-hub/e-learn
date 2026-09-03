@@ -1,0 +1,27 @@
+#!/bin/bash -e
+
+# jemalloc reduce notablemente la fragmentación de memoria de Ruby bajo Puma.
+if [ -z "${LD_PRELOAD+x}" ]; then
+    LD_PRELOAD=$(find /usr/lib -name libjemalloc.so.2 -print -quit)
+    export LD_PRELOAD
+fi
+
+# En desarrollo el código se monta desde el host, y ese bind mount tapa también
+# el node_modules que trae la imagen. En un clon recién hecho no existe, así que
+# se instala antes de arrancar; si no, esbuild y sass no estarían disponibles.
+if [ -f package.json ] && [ ! -d node_modules ] && command -v yarn > /dev/null; then
+    echo "node_modules ausente: instalando dependencias de JavaScript..."
+    yarn install
+    yarn build
+    yarn build:css
+fi
+
+# Solo al arrancar el servidor: crea la base si no existe y aplica migraciones
+# pendientes. Así no se toca la base al ejecutar `rails console`, tareas o specs.
+if [ "${1}" = "bin/rails" ] || [ "${1}" = "./bin/rails" ]; then
+    if [ "${2}" = "server" ] || [ "${2}" = "s" ]; then
+        bundle exec rails db:prepare
+    fi
+fi
+
+exec "${@}"

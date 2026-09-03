@@ -1,0 +1,24 @@
+// Estilos de los PDF generados con wicked_pdf (certificados).
+// Hoja aparte: wkhtmltopdf no comparte la de la aplicación, y los colores van
+// escritos a mano porque este fichero no pasa por _brand.scss.
+//
+// La cadena html > body > #content necesita height: 100% para que el marco del
+// certificado ocupe la página entera: wkhtmltopdf ignora las alturas en mm de
+// las tablas, pero sí propaga los porcentajes si todos los ancestros los tienen.
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Helvetica, Arial, sans-serif;
+  color: #2a4054;
+}
+
+#content {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+a {
+  color: #156c9c;
+  text-decoration: none;
+}

@@ -1,13 +1,19 @@
-.card
-  .card-header
-    %h2 Resend confirmation instructions
-  .card-body
-    = simple_form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f|
-      = f.error_notification
-      = f.full_error :confirmation_token
-      .form-inputs
-        = f.input :email, required: true, autofocus: true, value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email), input_html: { autocomplete: "email" }
-      .form-actions
-        = f.button :submit, "Resend confirmation instructions"
-  .card-footer
-    = render "devise/shared/links"
+- content_for :title do
+  E-Learn | Resend confirmation
+
+.el-auth
+  = link_to root_path do
+    = image_tag 'logo.png', alt: 'E-Learn', class: 'el-auth__logo'
+  %h1.el-auth__title Resend confirmation
+
+  %section.el-panel
+    .el-panel__body
+      = simple_form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f|
+        = f.error_notification
+        = f.full_error :confirmation_token
+        = f.input :email, required: true, autofocus: true,
+                  value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email),
+                  input_html: { autocomplete: 'email' }
+        = f.button :submit, 'Resend instructions', class: 'btn btn-primary w-100'
+
+      = render 'devise/shared/links'

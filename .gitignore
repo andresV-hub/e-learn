@@ -34,3 +34,14 @@
 /yarn-error.log
 yarn-debug.log*
 .yarn-integrity
+
+# Assets generados por esbuild y Sass (yarn build / yarn build:css).
+/app/assets/builds/*
+!/app/assets/builds/.keep
+# Fuentes de vendor copiadas desde node_modules por bin/copy-vendor-fonts.mjs.
+/app/assets/fonts
+
+# Estado local de herramientas y del IDE.
+/.idea
+.omc/
+/.claude/settings.local.json

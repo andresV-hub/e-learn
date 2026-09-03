@@ -1,7 +1,5 @@
 module ApplicationHelper
     
-    include Pagy::Frontend
-    
     def crud_label(key)
         case key
           when 'create'

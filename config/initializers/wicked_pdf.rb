@@ -10,7 +10,10 @@
 
 WickedPdf.config ||= {}
 WickedPdf.config.merge!({
-  layout: "pdf.html.haml",
+  # Nombre lógico del layout, sin extensiones. Con "pdf.html.haml" Rails buscaba
+  # literalmente layouts/pdf.html.haml para el formato :pdf y no lo encontraba,
+  # así que el certificado respondía "Template is missing".
+  layout: "pdf",
   orientation: "Landscape",
   lowquality: true,
   zoom: 1,

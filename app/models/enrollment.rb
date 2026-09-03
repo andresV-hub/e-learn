@@ -44,4 +44,16 @@ class Enrollment < ApplicationRecord
       end
     end
   end
+
+  # Ransack 4 dejó de exponer los atributos por defecto: hay que declarar
+  # explícitamente qué se puede buscar y ordenar. La lista se ciñe a lo que usan
+  # los formularios de búsqueda y los sort_link de las vistas, para no filtrar
+  # columnas sensibles a través de la query string.
+  def self.ransackable_attributes(_auth_object = nil)
+    %w[created_at price rating review updated_at]
+  end
+
+  def self.ransackable_associations(_auth_object = nil)
+    %w[course user]
+  end
 end

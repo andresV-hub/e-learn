@@ -1,12 +1,17 @@
-.card
-  .card-header
-    %h2 Forgot your password?
-  .card-body
-    = simple_form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f|
-      = f.error_notification
-      .form-inputs
-        = f.input :email, required: true, autofocus: true, input_html: { autocomplete: "email" }
-      .form-actions
-        = f.button :submit, "Send me reset password instructions"
-  .card-footer
-    = render "devise/shared/links"
+- content_for :title do
+  E-Learn | Reset your password
+
+.el-auth
+  = link_to root_path do
+    = image_tag 'logo.png', alt: 'E-Learn', class: 'el-auth__logo'
+  %h1.el-auth__title Reset your password
+
+  %section.el-panel
+    .el-panel__body
+      %p.el-meta We'll email you a link to choose a new one.
+      = simple_form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f|
+        = f.error_notification
+        = f.input :email, required: true, autofocus: true, input_html: { autocomplete: 'email' }
+        = f.button :submit, 'Send reset instructions', class: 'btn btn-primary w-100'
+
+      = render 'devise/shared/links'

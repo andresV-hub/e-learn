@@ -1,8 +1,28 @@
+-# Plantilla de correo. docs/imagen-de-marca.md §9: logotipo arriba sobre blanco,
+-# cuerpo en navy, sin fondos oscuros (muchos clientes de correo los rompen).
+-# Los estilos van en línea porque los clientes de correo ignoran las hojas
+-# externas. No se usa image_tag para el logotipo: los mailers no tienen
+-# asset_host configurado y la URL saldría relativa, sin resolver.
 !!!
 %html
   %head
-    %meta{:content => "text/html; charset=utf-8", "http-equiv" => "Content-Type"}/
-    :css
-      /* Email styles need to be inline */
-  %body
-    = yield
+    %meta{ 'http-equiv': 'Content-Type', content: 'text/html; charset=utf-8' }/
+    %meta{ name: 'viewport', content: 'width=device-width, initial-scale=1' }/
+  %body{ style: 'margin: 0; padding: 0; background-color: #f6f9fc;' }
+    %table{ role: 'presentation', width: '100%', cellpadding: '0', cellspacing: '0',
+            style: 'background-color: #f6f9fc; padding: 24px 12px;' }
+      %tr
+        %td{ align: 'center' }
+          %table{ role: 'presentation', width: '100%', cellpadding: '0', cellspacing: '0',
+                  style: 'max-width: 560px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; font-family: Helvetica, Arial, sans-serif; color: #2a4054;' }
+            %tr
+              %td{ style: 'padding: 24px 32px 8px;' }
+                %span{ style: 'font-size: 22px; font-weight: bold; letter-spacing: -0.5px; color: #156c9c;' }
+                  E-LEARN
+            %tr
+              %td{ style: 'padding: 8px 32px 24px; font-size: 15px; line-height: 1.6;' }
+                = yield
+            %tr
+              %td{ style: 'padding: 16px 32px 24px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b;' }
+                = link_to 'E-Learn', root_url, style: 'color: #156c9c; text-decoration: none;'
+                — online courses, taught by people who do the work.

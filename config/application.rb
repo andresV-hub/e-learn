@@ -8,8 +8,7 @@ Bundler.require(*Rails.groups)
 
 module ELearn
   class Application < Rails::Application
-    # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 6.1
+    config.load_defaults 8.1
     
     if Rails.env.development? #for rails-erd gem to generate a diagram
       def eager_load!
@@ -17,15 +16,20 @@ module ELearn
       end
     end
     
-    #video previews for action_text
+    # Permitir vídeo y audio embebidos dentro del contenido de Action Text.
+    #
+    # allowed_tags/allowed_attributes son nil por defecto: en ese caso Action
+    # Text delega en las listas del propio sanitizador. Hay que partir de esas
+    # listas, porque asignar solo las etiquetas extra dejaría fuera todas las
+    # habituales (p, strong, a...) y vaciaría el texto enriquecido.
     config.to_prepare do
-      ActionText::ContentHelper.allowed_tags << "iframe"
-      ActionText::ContentHelper.allowed_attributes.add 'style'
-      ActionText::ContentHelper.allowed_attributes.add 'controls'
-      ActionText::ContentHelper.allowed_tags.add 'audio'
-      ActionText::ContentHelper.allowed_tags.add 'video'
-      ActionText::ContentHelper.allowed_tags.add 'source'
-      ActionText::ContentHelper.allowed_tags << "iframe"
+      helper    = ActionText::ContentHelper
+      sanitizer = helper.sanitizer.class
+
+      helper.allowed_tags =
+        (helper.allowed_tags || sanitizer.allowed_tags).to_a | %w[iframe audio video source]
+      helper.allowed_attributes =
+        (helper.allowed_attributes || sanitizer.allowed_attributes).to_a | %w[style controls]
     end
     # Configuration for the application, engines, and railties goes here.
     #

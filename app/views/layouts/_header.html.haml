@@ -1,151 +1,116 @@
-%nav.navbar.navbar-expand-lg.navbar-dark.purple-background
-  %a.navbar-brand{:href => "/"}
-    = image_tag 'logo.png', size: '50x35', alt: "logo", class: 'rounded'
-    /= image_tag 'logo_blue.png', size: '20x20', alt: "logo"
-    /.fa.fa-graduation-cap{style: "color: rgb(37, 150, 190)"}
-    /.fa.fa-mug-hot{style: "color: rgb(37, 150, 190)"}
-    /E-Learn
-  %button.navbar-toggler{"aria-controls" => "navbarSupportedContent", "aria-expanded" => "false", "aria-label" => "Toggle navigation", "data-target" => "#navbarSupportedContent", "data-toggle" => "collapse", :type => "button"}
-    %span.navbar-toggler-icon
-  #navbarSupportedContent.collapse.navbar-collapse
-    /- if current_user && current_user.has_role?(:admin)
-    - if current_user
-      %ul.navbar-nav.mr-auto
-        %li.nav-item{class: "#{'active font-weight-bold' if current_page?(courses_path)}"}
-          = link_to courses_path, class: 'nav-link' do
-            .fa.fa-graduation-cap
-            Courses
-        .form-inline
-          /SEARCH IN NAVBAR
-          = search_form_for @ransack_courses, as: :courses_search, url: courses_path do |f|
-            .input-group
-              = f.search_field :title_cont, class: 'form-control-sm', style: 'float: left; width: 150px; ', placeholder: 'Find a course', :autocomplete => :off
-              %span.input-group-append
-                %button.btn.btn-primary.btn-sm{:type => "submit"}
-                  %span.fa.fa-search{"aria-hidden" => "true"}
-      %ul.navbar-nav.mr-auto.mr-right
-        /%li.nav-item{class: "#{'active font-weight-bold' if current_page?(new_course_path)}"}
-        /  = link_to new_course_path, class: 'nav-link' do
-        /    .fa.fa-plus
-        /    New Course
-        /%li.nav-item{class: "#{'active font-weight-bold' if current_page?(users_path)}"}
-        /  = link_to users_path, class: 'nav-link' do
-        /    .fa.fa-users
-        /    Users
-        /%li.nav-item{class: "#{'active font-weight-bold' if current_page?(enrollments_path)}"}
-        /  = link_to enrollments_path, class: 'nav-link' do
-        /    .fa.fa-lock-open
-        /    Enrollments
-        - if current_user.has_role?(:student)
+-# Cabecera. styles.md §5 (layout) y §6.2 (píldoras de estado).
+-# Los atributos son data-bs-* porque Bootstrap 5 no escucha los data-* de la 4:
+-# con los antiguos, el menú desplegable y el botón hamburguesa no abrían.
+%nav.navbar.navbar-expand-lg.navbar-dark.el-navbar
+  .container
+    = link_to root_path, class: 'navbar-brand d-flex align-items-center gap-2' do
+      = image_tag 'logo.png', alt: 'E-Learn', height: 34
+    %button.navbar-toggler{ type: 'button', 'data-bs-toggle': 'collapse', 'data-bs-target': '#mainNav',
+                            'aria-controls': 'mainNav', 'aria-expanded': 'false', 'aria-label': 'Toggle navigation' }
+      %span.navbar-toggler-icon
+
+    #mainNav.collapse.navbar-collapse
+      - if current_user
+        %ul.navbar-nav.me-auto
+          %li.nav-item
+            = link_to courses_path, class: "nav-link #{'active' if current_page?(courses_path)}" do
+              %i.fa.fa-graduation-cap{ 'aria-hidden': 'true' }
+              Courses
+
+        = search_form_for @ransack_courses, as: :courses_search, url: courses_path, html: { class: 'd-flex me-auto my-2 my-lg-0' } do |f|
+          .input-group.input-group-sm
+            = f.search_field :title_cont, class: 'form-control', placeholder: 'Find a course',
+                             autocomplete: 'off', 'aria-label': 'Find a course'
+            %button.btn.btn-light{ type: 'submit', 'aria-label': 'Search' }
+              %i.fa.fa-search{ 'aria-hidden': 'true' }
+
+        %ul.navbar-nav.ms-auto.align-items-lg-center
+          - if current_user.has_role?(:student)
+            %li.nav-item.dropdown
+              %a#studentDropdown.nav-link.dropdown-toggle{ href: '#', role: 'button',
+                                                           'data-bs-toggle': 'dropdown', 'aria-expanded': 'false' }
+                %i.fa.fa-graduation-cap{ 'aria-hidden': 'true' }
+                Learn
+              %ul.dropdown-menu.dropdown-menu-end{ 'aria-labelledby': 'studentDropdown' }
+                %li
+                  = link_to purchased_courses_path, class: 'dropdown-item d-flex align-items-center gap-2' do
+                    %i.fa.fa-graduation-cap{ 'aria-hidden': 'true' }
+                    %span.flex-grow-1 Purchased courses
+                    %span.el-pill.el-pill--info= current_user.enrollments_count
+                %li
+                  = link_to pending_review_courses_path, class: 'dropdown-item d-flex align-items-center gap-2' do
+                    %i.fa.fa-star{ 'aria-hidden': 'true' }
+                    %span.flex-grow-1 Pending review
+                    %span.el-pill.el-pill--warning= current_user.enrollments.pending_review.count
+
+          - if current_user.has_role?(:teacher)
+            %li.nav-item.dropdown
+              %a#teacherDropdown.nav-link.dropdown-toggle{ href: '#', role: 'button',
+                                                           'data-bs-toggle': 'dropdown', 'aria-expanded': 'false' }
+                %i.fa.fa-chalkboard-teacher{ 'aria-hidden': 'true' }
+                Teach
+              %ul.dropdown-menu.dropdown-menu-end{ 'aria-labelledby': 'teacherDropdown' }
+                %li
+                  = link_to new_course_path, class: 'dropdown-item d-flex align-items-center gap-2' do
+                    %i.fa.fa-plus{ 'aria-hidden': 'true' }
+                    %span.flex-grow-1 New course
+                %li
+                  = link_to created_courses_path, class: 'dropdown-item d-flex align-items-center gap-2' do
+                    %i.fa.fa-graduation-cap{ 'aria-hidden': 'true' }
+                    %span.flex-grow-1 My courses
+                    %span.el-pill.el-pill--info= current_user.courses_count
+                %li
+                  = link_to my_students_enrollments_path, class: 'dropdown-item d-flex align-items-center gap-2' do
+                    %i.fa.fa-users{ 'aria-hidden': 'true' }
+                    %span.flex-grow-1 My students
+                    %span.el-pill.el-pill--info= Enrollment.joins(:course).where(courses: { user: current_user }).count
+
+          - if current_user.has_role?(:admin)
+            %li.nav-item.dropdown
+              %a#adminDropdown.nav-link.dropdown-toggle{ href: '#', role: 'button',
+                                                         'data-bs-toggle': 'dropdown', 'aria-expanded': 'false' }
+                %i.fa.fa-cog{ 'aria-hidden': 'true' }
+                Admin
+              %ul.dropdown-menu.dropdown-menu-end{ 'aria-labelledby': 'adminDropdown' }
+                %li
+                  = link_to unapproved_courses_path, class: 'dropdown-item d-flex align-items-center gap-2' do
+                    %i.fa.fa-graduation-cap{ 'aria-hidden': 'true' }
+                    %span.flex-grow-1 Waiting for review
+                    -# Ámbar, no rojo: es trabajo pendiente, no un error (styles.md §6.2).
+                    %span.el-pill.el-pill--warning= Course.unapproved.count
+                %li
+                  = link_to users_path, class: 'dropdown-item d-flex align-items-center gap-2' do
+                    %i.fa.fa-users{ 'aria-hidden': 'true' }
+                    %span.flex-grow-1 Users
+                    %span.el-pill.el-pill--info= User.count
+                %li
+                  = link_to enrollments_path, class: 'dropdown-item d-flex align-items-center gap-2' do
+                    %i.fa.fa-lock-open{ 'aria-hidden': 'true' }
+                    %span.flex-grow-1 Enrollments
+                    %span.el-pill.el-pill--info= Enrollment.count
+                %li= link_to 'Activity', activity_path, class: 'dropdown-item'
+                %li= link_to 'Tags', tags_path, class: 'dropdown-item'
+                %li= link_to 'Analytics', analytics_path, class: 'dropdown-item'
+
           %li.nav-item.dropdown
-            %a#studentDropdown.nav-link.dropdown-toggle{"aria-expanded" => "false", "aria-haspopup" => "true", "data-toggle" => "dropdown", :href => "#", :role => "button"}
-              .fa.fa-graduation-cap
-              Learn
-            .dropdown-menu.dropdown-menu-right{"aria-labelledby" => "studentDropdown"}
-              = link_to purchased_courses_path, class: "dropdown-item" do
-                .fa.fa-graduation-cap
-                Purchased Courses
-                .badge.badge-danger
-                  = current_user.enrollments_count
-              = link_to pending_review_courses_path, class: "dropdown-item" do
-                .fa.fa-star
-                Pending Review
-                .badge.badge-danger
-                  = current_user.enrollments.pending_review.count
-        - if current_user.has_role?(:teacher)
-          %li.nav-item.dropdown
-            %a#teacherDropdown.nav-link.dropdown-toggle{"aria-expanded" => "false", "aria-haspopup" => "true", "data-toggle" => "dropdown", :href => "#", :role => "button"}
-              .fa.fa-chalkboard-teacher
-              Teach
-            .dropdown-menu.dropdown-menu-right{"aria-labelledby" => "teacherDropdown"}
-              = link_to new_course_path, class: "dropdown-item" do
-                .fa.fa-graduation-cap
-                .fa.fa-plus
-                New Course
-              = link_to created_courses_path, class: "dropdown-item" do
-                .fa.fa-graduation-cap
-                My courses
-                .badge.badge-danger
-                  = current_user.courses_count
-              = link_to my_students_enrollments_path, class: "dropdown-item" do
-                .fa.fa-users
-                My students
-                .badge.badge-danger
-                  = Enrollment.joins(:course).where(courses: {user: current_user}).count
-        - if current_user.has_role?(:admin)
-          %li.nav-item.dropdown
-            %a#adminDropdown.nav-link.dropdown-toggle{"aria-expanded" => "false", "aria-haspopup" => "true", "data-toggle" => "dropdown", :href => "#", :role => "button"}
-              .fa.fa-cog
-              Admin
-            .dropdown-menu.dropdown-menu-right{"aria-labelledby" => "adminDropdown"}
-              = link_to unapproved_courses_path, class: "dropdown-item" do
-                .fa.fa-graduation-cap
-                Unapproved courses
-                .badge.badge-danger
-                  = Course.unapproved.count
-              = link_to users_path, class: "dropdown-item" do
-                .fa.fa-users
-                Users
-                .badge.badge-danger
-                  = User.count
-              = link_to enrollments_path, class: "dropdown-item" do
-                .fa.fa-lock-open
-                Enrollments
-                .badge.badge-danger
-                  = Enrollment.count
-              = link_to activity_path, class: "dropdown-item" do
-                .fa.fa-bell
-                Activity
-              = link_to tags_path, class: "dropdown-item" do
-                .fa.fa-tags
-                Tags
-              = link_to analytics_path, class: "dropdown-item" do
-                .fa.fa-chart-line
-                Analytics
-      /.form-inline.my-2.my-lg-0
-      /  = form_tag(courses_path, method: :get) do
-      /    .input-group
-      /      = text_field_tag :title, params[:title], autocomplete: 'off', placeholder: "Find a course", class: 'form-control-sm'
-      /      %span.input-group-append
-      /        %button.btn.btn-primary.btn-sm{:type => "submit"}
-      /          %span.fa.fa-search{"aria-hidden" => "true"}
-      %ul.navbar-nav.mr-right
-        /%li.nav-item{class: "#{'active font-weight-bold' if current_page?(activity_path)}"}
-        /  - if current_user.has_role?(:admin)
-        /    = link_to static_pages_activity_path, class: 'nav-link' do
-        /      .fa.fa-bell
-        /      Activity
-        %li.nav-item.dropdown
-          %a#navbarDropdown.nav-link.dropdown-toggle{"aria-expanded" => "false", "aria-haspopup" => "true", "data-toggle" => "dropdown", :href => "#", :role => "button"}
-            - if current_user.image?
-              = image_tag current_user.image, size: '30x30', alt: "#{current_user.email}", class: 'rounded-circle'
-            - else
-              .fa.fa-user
-            %b= current_user.username
-          .dropdown-menu.dropdown-menu-right{"aria-labelledby" => "navbarDropdown"}
-            = link_to user_path(current_user), class: "dropdown-item" do
-              .fa.fa-user
-              %b My profile
-            = link_to edit_user_registration_path, class: "dropdown-item" do
-              .fa.fa-cog
-              %b Account settings
-            = link_to destroy_user_session_path, method: :delete, class: "dropdown-item" do
-              .fa.fa-sign-out-alt
-              %b Sign out
-    - else
-      %ul.navbar-nav.mr-auto
-      %ul.navbar-nav.mr-right
-        %li.nav-item{class: "#{'active font-weight-bold' if current_page?(new_user_registration_path)}"}
-          = link_to 'Sign Up', new_user_registration_path, class: 'nav-link'
-        %li.nav-item{class: "#{'active font-weight-bold' if current_page?(new_user_session_path)}"}
-          = link_to 'Log In', new_user_session_path, class: 'nav-link'
-        %li.nav-item{class: "#{'active font-weight-bold' if current_page?(user_google_oauth2_omniauth_authorize_path)}"}
-          %li.nav-item{class: "#{'active font-weight-bold' if current_page?(user_google_oauth2_omniauth_authorize_path)}"}
-          = link_to user_google_oauth2_omniauth_authorize_path, method: :post, class: 'nav-link' do
-            .fab.fa-google
-        %li.nav-item{class: "#{'active font-weight-bold' if current_page?(user_github_omniauth_authorize_path)}"}
-          = link_to user_github_omniauth_authorize_path, method: :post, class: 'nav-link' do
-            .fab.fa-github
-        %li.nav-item{class: "#{'active font-weight-bold' if current_page?(user_facebook_omniauth_authorize_path)}"}
-          = link_to user_facebook_omniauth_authorize_path, method: :post, class: 'nav-link' do
-            .fab.fa-facebook
+            %a#accountDropdown.nav-link.dropdown-toggle.d-flex.align-items-center.gap-2{ href: '#', role: 'button',
+                                                                                         'data-bs-toggle': 'dropdown', 'aria-expanded': 'false' }
+              - if current_user.image?
+                = image_tag current_user.image, size: '28x28', alt: '', class: 'rounded-circle'
+              - else
+                %i.fa.fa-user{ 'aria-hidden': 'true' }
+              = current_user.username
+            %ul.dropdown-menu.dropdown-menu-end{ 'aria-labelledby': 'accountDropdown' }
+              %li= link_to 'My profile', user_path(current_user), class: 'dropdown-item'
+              %li= link_to 'Account settings', edit_user_registration_path, class: 'dropdown-item'
+              %li
+                %hr.dropdown-divider
+              %li
+                = link_to 'Sign out', destroy_user_session_path, data: { turbo_method: :delete }, class: 'dropdown-item'
+
+      - else
+        %ul.navbar-nav.ms-auto.align-items-lg-center
+          %li.nav-item
+            = link_to 'Log in', new_user_session_path, class: "nav-link #{'active' if current_page?(new_user_session_path)}"
+          %li.nav-item.ms-lg-2
+            = link_to 'Sign up', new_user_registration_path, class: 'btn btn-primary btn-sm'

@@ -1,20 +1,23 @@
-You have enrolled to the course
-= link_to @enrollment.course, @enrollment.course
-.row
-Enrollment date:
-= @enrollment.created_at
-.row
-Enrollment ID: 
-= @enrollment.slug
-.row
-Course price:
-= @enrollment.course.price
-.row
-Price paid:
-= @enrollment.price
-.row
-After completing the course, you will be entitled to a Certificate of Completion.
-.row
-Regards, 
-.row
-= link_to 'The E-Learn team', root_url
+%h1{ style: 'font-size: 20px; margin: 0 0 16px;' } You're in
+%p{ style: 'margin: 0 0 20px;' }
+  You have enrolled in
+  = succeed '.' do
+    = link_to @enrollment.course, course_url(@enrollment.course), style: 'color: #156c9c; font-weight: bold;'
+  Finish it and you'll get your certificate of completion.
+
+%p{ style: 'margin: 0 0 24px;' }
+  = link_to 'Start learning', course_url(@enrollment.course), style: 'display: inline-block; background-color: #156c9c; color: #ffffff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;'
+
+%table{ role: 'presentation', width: '100%', cellpadding: '0', cellspacing: '0', style: 'font-size: 14px; border-top: 1px solid #e2e8f0;' }
+  %tr
+    %td{ style: 'padding: 8px 0; color: #64748b;' } Enrollment date
+    %td{ style: 'padding: 8px 0; text-align: right;' }= @enrollment.created_at.strftime('%d %b %Y')
+  %tr
+    %td{ style: 'padding: 8px 0; color: #64748b;' } Enrollment ID
+    %td{ style: 'padding: 8px 0; text-align: right;' }= @enrollment.slug
+  %tr
+    %td{ style: 'padding: 8px 0; color: #64748b;' } Price paid
+    %td{ style: 'padding: 8px 0; text-align: right;' }= number_to_currency(@enrollment.price)
+
+%p{ style: 'margin: 24px 0 0; color: #64748b;' }
+  = link_to 'The E-Learn team', root_url, style: 'color: #156c9c;'

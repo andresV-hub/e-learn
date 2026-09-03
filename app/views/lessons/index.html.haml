@@ -1,25 +1,35 @@
-%h1 Listing lessons
+- content_for :title do
+  E-Learn | #{@course.title} lessons
 
-%table
-  %thead
-    %tr
-      %th Title
-      %th Content
-      %th Course
-      %th
-      %th
-      %th
+-# Las lecciones están anidadas bajo el curso: esta vista usaba lesson_path,
+-# edit_lesson_path y new_lesson_path, que no existen como rutas y rompían.
+%nav{ 'aria-label': 'Breadcrumb' }
+  %ol.breadcrumb
+    %li.breadcrumb-item= link_to 'Courses', courses_path
+    %li.breadcrumb-item= link_to @course.title, course_path(@course)
+    %li.breadcrumb-item.active{ 'aria-current': 'page' } Lessons
 
-  %tbody
-    - @lessons.each do |lesson|
-      %tr
-        %td= lesson.title
-        %td= lesson.content
-        %td= lesson.course
-        %td= link_to 'Show', lesson
-        %td= link_to 'Edit', edit_lesson_path(lesson)
-        %td= link_to 'Destroy', lesson, method: :delete, data: { confirm: 'Are you sure?' }
+%header.el-page-header
+  .el-page-header__lead
+    %span.el-page-header__eyebrow Course content
+    %h1.el-page-header__title= pluralize(@lessons.size, 'lesson')
+  - if policy(@course).owner?
+    .el-page-header__actions
+      = link_to new_course_lesson_path(@course), class: 'btn btn-primary btn-sm' do
+        %i.fa.fa-plus{ 'aria-hidden': 'true' }
+        New lesson
 
-%br
-
-= link_to 'New Lesson', new_lesson_path
+%section.el-panel
+  - if @lessons.any?
+    %ul.el-lesson-list
+      - @lessons.each do |lesson|
+        %li.el-lesson-list__item
+          = render 'lessons/lesson_preview', lesson: lesson
+  - else
+    .el-panel__body
+      .el-empty
+        %i.el-empty__icon.fa.fa-tasks{ 'aria-hidden': 'true' }
+        .el-empty__title No lessons yet
+        - if policy(@course).owner?
+          %p.mb-3 Add the first one to get this course going.
+          = link_to 'New lesson', new_course_lesson_path(@course), class: 'btn btn-primary'
