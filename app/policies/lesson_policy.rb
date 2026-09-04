@@ -6,7 +6,7 @@ class LessonPolicy < ApplicationPolicy
   end
 
   def show?
-    @user.has_role?(:admin) || @record.course.user_id == @user.id || @record.course.bought(@user) == false
+    @user.has_role?(:admin) || @record.course.user_id == @user.id || @record.course.bought?(@user)
   end
 
   def edit?
@@ -17,8 +17,10 @@ class LessonPolicy < ApplicationPolicy
     @record.course.user_id == @user.id
   end
 
+  # Devolvía nil, con lo que cualquier authorize sobre el formulario de alta
+  # habría denegado siempre. Quien puede crear la lección puede verlo.
   def new?
-    #@user.has_role?(:teacher)
+    create?
   end
 
   def create?

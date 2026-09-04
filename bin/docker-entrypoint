@@ -20,6 +20,11 @@ fi
 # pendientes. Así no se toca la base al ejecutar `rails console`, tareas o specs.
 if [ "${1}" = "bin/rails" ] || [ "${1}" = "./bin/rails" ]; then
     if [ "${2}" = "server" ] || [ "${2}" = "s" ]; then
+        # tmp/ vive en un volumen con nombre, así que el pidfile sobrevive a un
+        # apagado brusco del contenedor y Puma se niega a arrancar con
+        # "A server is already running". Dentro del contenedor solo corre este
+        # servidor, de modo que un pidfile heredado siempre está obsoleto.
+        rm -f tmp/pids/server.pid
         bundle exec rails db:prepare
     fi
 fi

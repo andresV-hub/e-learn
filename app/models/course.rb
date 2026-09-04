@@ -30,6 +30,7 @@ class Course < ApplicationRecord
     validates :short_description, length: { maximum: 300 }
     validates :title, uniqueness: true, length: { maximum: 70 }
     validates :price, numericality: { greater_than_or_equal_to: 0 }
+    validate :lesson_titles_must_not_repeat
     has_rich_text :description
     
     extend FriendlyId
@@ -37,6 +38,24 @@ class Course < ApplicationRecord
     
     def to_s
         title
+    end
+
+    # El asistente guarda todas las lecciones del paso en la misma transacción,
+    # así que la validación de unicidad de Lesson no ve a sus hermanas todavía
+    # sin guardar: dos lecciones con el mismo título generaban el mismo slug y
+    # el formulario moría con PG::UniqueViolation (error 500). Se comparan aquí
+    # los títulos que llegan en el mismo envío, que es donde sí se ven.
+    #
+    # Se mira lessons.target, no la asociación completa, para no cargar el
+    # temario entero en cada guardado del curso.
+    def lesson_titles_must_not_repeat
+      titles = lessons.target.reject(&:marked_for_destruction?)
+                             .map { |lesson| lesson.title.to_s.strip.downcase }
+                             .reject(&:blank?)
+      repeated = titles.tally.select { |_title, count| count > 1 }.keys
+      return if repeated.empty?
+
+      errors.add(:base, "Lesson titles must be different from each other: #{repeated.join(', ')}")
     end
     
     def update_rating
@@ -47,8 +66,12 @@ class Course < ApplicationRecord
       end
     end
       
-    def bought(user)
-      self.enrollments.where(user_id: [user.id], course_id: [self.id]).empty?
+    # Devolvía lo contrario de lo que anuncia su nombre (true cuando NO había
+    # matrícula) y CoursePolicy#show? lo leía en positivo, así que cualquier
+    # usuario registrado podía abrir el borrador de otro. Ahora responde a la
+    # pregunta que formula.
+    def bought?(user)
+      user.present? && enrollments.exists?(user_id: user.id)
     end
     
     def progress(user)
@@ -68,7 +91,10 @@ class Course < ApplicationRecord
       end
       
      include PublicActivity::Model
-      tracked owner: Proc.new{ |controller, model| controller.current_user }
+      # El controlador es nil fuera de una petición (seeds, consola, tareas rake,
+      # jobs): sin el navegador seguro, cualquier alta desde ahí revienta con
+      # NoMethodError. En esos casos la actividad se registra sin propietario.
+      tracked owner: Proc.new { |controller, model| controller&.current_user }
 
     # Ransack 4 dejó de exponer los atributos por defecto: hay que declarar
     # explícitamente qué se puede buscar y ordenar. La lista se ciñe a lo que usan

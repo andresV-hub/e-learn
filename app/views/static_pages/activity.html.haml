@@ -18,6 +18,9 @@
             %div
               %span.el-pill.el-pill--muted= model_label(activity.trackable_type)
               %span.ms-1= crud_label(activity.key.match(/\.(.*)/)[1])
+              -# Un curso borrado deja su actividad "destroy" apuntando a nada,
+              -# igual que las lecciones y los comentarios: sin comprobarlo,
+              -# borrar un curso tumbaba esta página entera.
               - if activity.trackable_type == 'Lesson'
                 - if Lesson.where(id: activity.trackable_id).present?
                   = link_to activity.trackable, course_lesson_path(activity.trackable.course, activity.trackable)
@@ -28,11 +31,18 @@
                   = link_to truncate(activity.trackable.content, length: 60), course_lesson_path(activity.trackable.lesson.course, activity.trackable.lesson)
                 - else
                   %span.el-meta (deleted)
-              - else
+              - elsif activity.trackable.present?
                 = link_to activity.trackable, activity.trackable
+              - else
+                %span.el-meta (deleted)
+            -# Las altas hechas fuera de una petición (seeds, consola, tareas)
+            -# no tienen usuario al que atribuirlas.
             %div.el-meta
               by
-              = link_to activity.owner, user_path(activity.owner)
+              - if activity.owner.present?
+                = link_to activity.owner, user_path(activity.owner)
+              - else
+                the system
               ·
               = "#{time_ago_in_words(activity.created_at)} ago"
 

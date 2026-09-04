@@ -1,6 +1,9 @@
 class ApplicationController < ActionController::Base
     
-    protect_from_forgery
+    # Sin `with:` esto rebaja la protección que Rails ya trae por defecto
+    # (with: :exception) a :null_session, que en vez de rechazar una petición
+    # con token inválido la sigue procesando como anónima.
+    protect_from_forgery with: :exception
     include Pundit::Authorization
     rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
     include Pagy::Method

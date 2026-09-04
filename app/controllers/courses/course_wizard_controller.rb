@@ -33,7 +33,10 @@ class Courses::CourseWizardController < ApplicationController
     when :lessons
     when :publish
     end
-    @course.update(course_params)
+    # Solo se asignan los atributos: render_wizard es quien guarda, y si el
+    # guardado falla se queda en el paso actual con los errores. Llamar antes a
+    # update suponía intentar el mismo guardado dos veces por envío.
+    @course.assign_attributes(course_params)
     render_wizard @course
   end
 
@@ -57,10 +60,16 @@ class Courses::CourseWizardController < ApplicationController
     end
 
     def course_params
-      params.require(:course).permit(:title, :description, :short_description, :price,
+      permitted = params.require(:course).permit(:title, :description, :short_description, :price,
         :published, :language, :level, :avatar, tag_ids: [],
         lessons_attributes: [:id, :title, :content, :_destroy]
       )
+      # tag_ids llega del select de selectize, que puede mandar identificadores
+      # que ya no existen (una etiqueta borrada mientras se rellenaba el paso, o
+      # una que el servidor rechazó al crearla). Asignar uno inexistente lanza
+      # RecordNotFound y el paso respondía 404, así que se descartan.
+      permitted[:tag_ids] = Tag.where(id: permitted[:tag_ids]).pluck(:id) if permitted.key?(:tag_ids)
+      permitted
     end
 
 end

@@ -1,7 +1,10 @@
 class Comment < ApplicationRecord
 
   include PublicActivity::Model
-  tracked owner: Proc.new{ |controller, model| controller.current_user }
+  # El controlador es nil fuera de una petición (seeds, consola, tareas rake,
+  # jobs): sin el navegador seguro, cualquier alta desde ahí revienta con
+  # NoMethodError. En esos casos la actividad se registra sin propietario.
+  tracked owner: Proc.new { |controller, model| controller&.current_user }
 
   belongs_to :user, counter_cache: true
   belongs_to :lesson, counter_cache: true

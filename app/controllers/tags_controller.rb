@@ -5,12 +5,19 @@ class TagsController < ApplicationController
     authorize @tags
   end
   
+  # Lo llama selectize desde el paso "details" del asistente cuando el profesor
+  # escribe una etiqueta que no está en la lista. Un nombre ya existente no es
+  # un error para quien lo escribe: se le devuelve la etiqueta que ya hay, en
+  # lugar de un JSON de errores que el navegador acababa mandando de vuelta
+  # como tag_ids=undefined (y el curso respondía 404 al guardar el paso).
   def create
-    @tag = Tag.new(tag_params)
-    if @tag.save
+    name = tag_params[:name].to_s.strip
+    @tag = Tag.where('LOWER(name) = ?', name.downcase).first || Tag.new(name: name)
+
+    if @tag.persisted? || @tag.save
       render json: @tag
     else
-      render json: {errors: @tag.errors.full_messages}
+      render json: { errors: @tag.errors.full_messages }, status: :unprocessable_entity
     end
   end
   

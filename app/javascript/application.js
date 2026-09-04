@@ -22,6 +22,18 @@ Chartkick.use(Chart)
 import jQuery from "jquery"
 window.jQuery = jQuery
 window.$ = jQuery
+
+// rails-ujs ya no está en el bundle, así que nadie añade el token CSRF a las
+// peticiones de jQuery: hay que ponerlo aquí. Sin él Rails las trata como no
+// autenticadas, y eso dejaba sin efecto el reordenado de lecciones por
+// arrastre y el alta de etiquetas del asistente. Se lee en cada petición
+// porque Turbo reemplaza la meta en cada navegación.
+jQuery.ajaxSetup({
+  beforeSend: function (xhr) {
+    const token = document.querySelector('meta[name="csrf-token"]')
+    if (token) { xhr.setRequestHeader("X-CSRF-Token", token.content) }
+  }
+})
 import "jquery-ui-dist/jquery-ui"
 
 import videojs from "video.js"
@@ -68,7 +80,17 @@ document.addEventListener("turbo:load", function () {
     create: function(input, callback) {
       $.post('/tags.json', { tag: { name: input } })
         .done(function(response){
-          callback({value: response.id, text: response.name });
+          // Sin id no hay etiqueta que seleccionar: se llama a callback() sin
+          // argumentos, que es como selectize cancela la creación. Antes se le
+          // pasaba {value: undefined} y ese "undefined" viajaba en tag_ids.
+          if (response && response.id) {
+            callback({value: response.id, text: response.name });
+          } else {
+            callback();
+          }
+        })
+        .fail(function(){
+          callback();
         })
     }
   });

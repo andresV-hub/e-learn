@@ -17,9 +17,13 @@ class LessonsController < ApplicationController
     @comments = @lesson.comments.order(created_at: :desc)
   end
 
+  # El formulario se autoriza igual que el alta: sin esto, cualquier usuario
+  # registrado podía abrir el alta de lecciones de un curso ajeno y solo se
+  # encontraba el rechazo al enviarlo.
   def new
-    @lesson = Lesson.new
     @course = Course.friendly.find(params[:course_id])
+    @lesson = @course.lessons.new
+    authorize @lesson
   end
 
   def edit

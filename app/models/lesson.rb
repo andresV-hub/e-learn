@@ -13,7 +13,10 @@ class Lesson < ApplicationRecord
     friendly_id :title, use: :slugged
         
     include PublicActivity::Model
-    tracked owner: Proc.new{ |controller, model| controller.current_user }
+    # El controlador es nil fuera de una petición (seeds, consola, tareas rake,
+    # jobs): sin el navegador seguro, cualquier alta desde ahí revienta con
+    # NoMethodError. En esos casos la actividad se registra sin propietario.
+    tracked owner: Proc.new { |controller, model| controller&.current_user }
     
     include RankedModel
     ranks :row_order, :with_same => :course_id
